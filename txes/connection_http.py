@@ -19,60 +19,12 @@ from txes import exceptions, interfaces, utils
 DEFAULT_SERVER = "127.0.0.1:9200"
 
 
-class StringProducer(object):
-    interface.implements(iweb.IBodyProducer)
-
-    def __init__(self, body):
-        self.body = body
-        self.length = len(self.body)
-
-    def startProducing(self, consumer):
-        return defer.maybeDeferred(consumer.write, self.body)
-
-    def pauseProducing(self):
-        pass
-
-    def stopProducing(self):
-        pass
-
-
-class JSONProducer(StringProducer):
-    def __init__(self, body):
-        StringProducer.__init__(self, anyjson.serialize(body))
-
-
-class JSONReceiver(protocol.Protocol):
-    def __init__(self, deferred):
-        self.deferred = deferred
-        self.writter = codecs.getwriter("utf_8")(StringIO.StringIO())
-
-    def dataReceived(self, bytes):
-        self.writter.write(bytes)
-
-    def connectionLost(self, reason):
-        if reason.check(client.ResponseDone, http.PotentialDataLoss):
-            try:
-                data = anyjson.deserialize(self.writter.getvalue())
-            except ValueError:
-                data = {"error": reason}
-            self.deferred.callback(data)
-        else:
-            self.deferred.errback(reason)
-
-
 class HTTPConnection(object):
     interface.implements(interfaces.IConnection)
 
     def addServer(self, server):
         if server not in self.servers:
             self.servers.append(server)
-
-    def getAgent(self):
-        try:
-            return self.client
-        except AttributeError:
-            self.client = client.Agent(reactor)
-            return self.client
 
     def connect(self, servers=None, timeout=None, retryTime=10,
                 *args, **kwargs):
@@ -93,12 +45,6 @@ class HTTPConnection(object):
                 exceptions.raiseExceptions(status, body)
             return body
 
-        def parseResponse(response):
-            d = defer.Deferred()
-            response.deliverBody(JSONReceiver(d))
-            return d.addCallback(raiseExceptions, response)
-
-        agent = self.getAgent()
         server = self.servers.get()
         if not path.startswith('/'):
             path = '/' + path
@@ -107,14 +53,15 @@ class HTTPConnection(object):
         if params:
             url = url + '?' + urllib.urlencode(params)
 
-        if isinstance(body, basestring):
-            body = StringProducer(body)
-        else:
-            body = JSONProducer(body)
+        if not isinstance(body, basestring):
+            body = anyjson.serialize(body)
 
         if not url.startswith("http://"):
             url = "http://" + url
 
-        d = agent.request(method, str(url), bodyProducer=body)
-        d.addCallback(parseResponse)
+        def decode_json(body_string):
+            return anyjson.deserialize(body_string)
+        d = client.getPage(str(url), method=method, postdata=body,
+                           headers={'Content-Type':'application/json'})
+        d.addCallback(decode_json)
         return d
