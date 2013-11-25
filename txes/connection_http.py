@@ -57,7 +57,7 @@ class JSONReceiver(protocol.Protocol):
                 data = {"error": reason}
             self.deferred.callback(data)
         else:
-            self.deffered.errback(reason)
+            self.deferred.errback(reason)
 
 
 class HTTPConnection(object):
