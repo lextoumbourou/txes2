@@ -39,12 +39,6 @@ class HTTPConnection(object):
         pass
 
     def execute(self, method, path, body=None, params=None):
-        def raiseExceptions(body, response):
-            status = int(response.code)
-            if status != 200:
-                exceptions.raiseExceptions(status, body)
-            return body
-
         server = self.servers.get()
         if not path.startswith('/'):
             path = '/' + path
@@ -61,7 +55,11 @@ class HTTPConnection(object):
 
         def decode_json(body_string):
             return anyjson.deserialize(body_string)
+        def eb(reason):
+            reason.raiseException()
+
         d = client.getPage(str(url), method=method, postdata=body,
                            headers={'Content-Type':'application/json'})
         d.addCallback(decode_json)
+        d.addErrback(eb)
         return d
