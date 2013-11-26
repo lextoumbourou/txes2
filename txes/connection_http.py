@@ -56,7 +56,14 @@ class HTTPConnection(object):
         def decode_json(body_string):
             return anyjson.deserialize(body_string)
         def eb(reason):
-            reason.raiseException()
+            status = int(reason.value.status)
+            try:
+                body = decode_json(reason.value.response)
+            except:
+                body = {'error': reason.value.response}
+            if status != 200:
+                exceptions.raiseExceptions(status, body)
+            return body
 
         d = client.getPage(str(url), method=method, postdata=body,
                            headers={'Content-Type':'application/json'})
