@@ -40,11 +40,6 @@ class ElasticSearch(object):
                                              retryTime=retryTime)
         if discover:
             self._performDiscovery()
-        else:
-            def cb(data):
-                self.custerName = data["cluster_name"]
-            d = self.clusterNodes()
-            d.addCallback(cb)
 
     def _makePath(self, components):
         return '/' + '/'.join([str(c) for c in components if c])
