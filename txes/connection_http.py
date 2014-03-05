@@ -56,6 +56,7 @@ class HTTPConnection(object):
         def decode_json(body_string):
             return anyjson.deserialize(body_string)
         def eb(reason):
+            reason.trap(client.error.Error)
             status = int(reason.value.status)
             try:
                 body = decode_json(reason.value.response)
