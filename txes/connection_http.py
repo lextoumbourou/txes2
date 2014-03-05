@@ -7,7 +7,7 @@ import urllib
 
 import anyjson
 
-from twisted.internet import defer, reactor, protocol
+from twisted.internet import defer, reactor, protocol, error
 from twisted.web import client
 from twisted.web import iweb
 from twisted.web import http
@@ -56,6 +56,10 @@ class HTTPConnection(object):
         def decode_json(body_string):
             return anyjson.deserialize(body_string)
         def eb(reason):
+            # Trap ConnectionRefused and raise it, no need to get status
+            e = reason.trap(error.ConnectionRefusedError)
+            if e:
+                raise error.ConnectionRefusedError, reason
             status = int(reason.value.status)
             try:
                 body = decode_json(reason.value.response)
