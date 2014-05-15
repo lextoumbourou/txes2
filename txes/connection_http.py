@@ -32,7 +32,7 @@ class HTTPConnection(object):
             servers = [DEFAULT_SERVER]
         elif isinstance(servers, (str, unicode)):
             servers = [servers]
-        self.servers = utils.ServerList(servers, retryTime=retryTime)
+        self.servers = utils.ServerList(servers, retryTime=retryTime, timeout=timeout)
         self.agents = {}
 
     def close(self):
@@ -40,6 +40,7 @@ class HTTPConnection(object):
 
     def execute(self, method, path, body=None, params=None):
         server = self.servers.get()
+        timeout = self.server.timeout
         if not path.startswith('/'):
             path = '/' + path
         url = server + path
@@ -55,6 +56,7 @@ class HTTPConnection(object):
 
         def decode_json(body_string):
             return anyjson.deserialize(body_string)
+
         def eb(reason):
             reason.trap(client.error.Error)
             status = int(reason.value.status)
@@ -66,8 +68,8 @@ class HTTPConnection(object):
                 exceptions.raiseExceptions(status, body)
             return body
 
-        d = client.getPage(str(url), method=method, postdata=body,
-                           headers={'Content-Type':'application/json'})
+        d = client.getPage(str(url), method=method, postdata=body, timeout=timeout,
+                           headers={'Content-Type': 'application/json'})
         d.addCallback(decode_json)
         d.addErrback(eb)
         return d

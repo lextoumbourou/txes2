@@ -5,10 +5,11 @@ from txes import exceptions
 
 
 class ServerList(list):
-    def __init__(self, servers, retryTime=10):
+    def __init__(self, servers, retryTime=10, timeout=None):
         list.__init__(self, servers)
         self.dead = []
         self.retryTime = retryTime
+        self.timeout = timeout
 
     def get(self):
         if self.dead:

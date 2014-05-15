@@ -11,7 +11,7 @@ class ElasticSearch(object):
 
     Inspired by (code stolen from) pyes and paisley
     """
-    def __init__(self, servers=None, timeout=None, bulkSize=400,
+    def __init__(self, servers=None, timeout=30, bulkSize=400,
                  discover=True, retryTime=10, discoveryInterval=300,
                  defaultIndexes=None, autorefresh=False):
         if isinstance(servers, basestring):
