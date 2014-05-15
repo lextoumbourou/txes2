@@ -40,7 +40,7 @@ class HTTPConnection(object):
 
     def execute(self, method, path, body=None, params=None):
         server = self.servers.get()
-        timeout = self.server.timeout
+        timeout = self.servers.timeout
         if not path.startswith('/'):
             path = '/' + path
         url = server + path
