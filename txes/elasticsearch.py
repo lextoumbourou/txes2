@@ -478,6 +478,7 @@ class ElasticSearch(object):
                 cmd[optype]["_id"] = id
             data = '\n'.join([anyjson.serialize(cmd),
                               anyjson.serialize(doc)])
+            data += '\n'
             self.bulkData.append(data)
             return self.flushBulk()
 
