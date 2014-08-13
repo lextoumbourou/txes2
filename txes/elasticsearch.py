@@ -369,8 +369,7 @@ class ElasticSearch(object):
             self.info['server'] = {}
             self.info['server']['name'] = result['name']
             self.info['server']['version'] = result['version']
-            self.info['allinfo'] = ressult
-            self.info['status'] = self.status(["_all"])
+            self.info['allinfo'] = result
             return self.info
 
         d = self._sendRequest("GET", '/')
