@@ -247,7 +247,7 @@ class ElasticSearch(object):
 
     def flush(self, indexes=None, refresh=None):
         def flushIt(result=None):
-            indices= self._validateIndexes(indexes)
+            indices = self._validateIndexes(indexes)
             path = self._makePath([','.join(indices), "_flush"])
             params = None
             if refresh:
@@ -276,7 +276,7 @@ class ElasticSearch(object):
             return d
 
         def refreshIt(result=None):
-            indices= self._validateIndexes(indexes)
+            indices = self._validateIndexes(indexes)
             path = self._makePath([','.join(indices), "_refresh"])
             d = self._sendRequest("POST", path)
             d.addCallback(delay)
@@ -306,7 +306,7 @@ class ElasticSearch(object):
                   "refesh": refresh,
                   "flush": flush}
         if maxNumSegments:
-            params["max_num_segments"] = maxNumSegement
+            params["max_num_segments"] = maxNumSegments
         d = self._sendRequest("POST", path, params=params)
         d.addCallback(done)
         return d
@@ -549,9 +549,9 @@ class ElasticSearch(object):
         elif isinstance(docTypes, basestring):
             docTypes = [docTypes]
 
-        path = self._makePath([','.join(indices), ','.join(docTypes),
-                               "_query"])
-        d = self._sendRequest("DELETE", path, body=body, params=params)
+        path = self._makePath(
+            [','.join(indices), ','.join(docTypes), "_query"])
+        d = self._sendRequest("DELETE", path, params=params)
         return d
 
     def deleteMapping(self, index, docType):
@@ -690,7 +690,7 @@ class ElasticSearch(object):
                               body=river)
         return d
 
-    def deleteRiver(seld, river, riverName=None):
+    def deleteRiver(self, river, riverName=None):
         """
         Delete a river
         """
@@ -699,7 +699,7 @@ class ElasticSearch(object):
         d = self._sendRequest("DELETE", "/_river/%s/" % riverName)
         return d
 
-    def moreLikeThis(seld, index, docType, id, fields, **params):
+    def moreLikeThis(self, index, docType, id, fields, **params):
         """
         Execute a "more like this" search query against on eor more fields.
         """

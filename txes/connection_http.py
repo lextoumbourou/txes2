@@ -1,16 +1,7 @@
-import codecs
-try:
-    import cStringIO as StringIO
-except ImportError:
-    import StringIO
 import urllib
 
 import anyjson
-
-from twisted.internet import defer, reactor, protocol
 from twisted.web import client
-from twisted.web import iweb
-from twisted.web import http
 from zope import interface
 
 from txes import exceptions, interfaces, utils
@@ -32,7 +23,8 @@ class HTTPConnection(object):
             servers = [DEFAULT_SERVER]
         elif isinstance(servers, (str, unicode)):
             servers = [servers]
-        self.servers = utils.ServerList(servers, retryTime=retryTime, timeout=timeout)
+        self.servers = utils.ServerList(
+            servers, retryTime=retryTime, timeout=timeout)
         self.agents = {}
 
     def close(self):
@@ -68,8 +60,9 @@ class HTTPConnection(object):
                 exceptions.raiseExceptions(status, body)
             return body
 
-        d = client.getPage(str(url), method=method, postdata=body, timeout=timeout,
-                           headers={'Content-Type': 'application/json'})
+        d = client.getPage(
+            str(url), method=method, postdata=body, timeout=timeout,
+            headers={'Content-Type': 'application/json'})
         d.addCallback(decode_json)
         d.addErrback(eb)
         return d
