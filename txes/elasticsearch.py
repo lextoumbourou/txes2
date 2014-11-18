@@ -574,6 +574,45 @@ class ElasticSearch(object):
         d = self._sendRequest("GET", path, params=params)
         return d
 
+    def mget(self, ids, index=None, docType=None, **query_params):
+        """
+        Get multiples documents based on id.
+
+        ids can be:
+            list of tuples: (index, type, id)
+            list of ids: index and docType are required
+        """
+        if not ids:
+            return []
+
+        body = []
+        for value in ids:
+            if isinstance(value, tuple):
+                if len(value) == 3:
+                    a, b, c = value
+                    body.append({"_index": a,
+                                 "_type": b,
+                                 "_id": c})
+                elif len(value) == 4:
+                    a, b, c, d = value
+                    body.append({"_index": a,
+                                 "_type": b,
+                                 "_id": c,
+                                 "fields": d})
+            else:
+                if index is None:
+                    raise Exception("index value is required for id")
+                if docType is None:
+                    raise Exception("doc_type value is required for id")
+
+                body.append({"_index": index,
+                             "_type": docType,
+                             "_id": value})
+
+        d = self._sendRequest(
+            'GET', path='/_mget', body={'docs': body}, params=query_params)
+        return d
+
     def search(self, query, indexes=None, docType=None, **params):
         """
         Execute a search agains one or more indices
