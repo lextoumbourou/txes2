@@ -5,6 +5,7 @@ python:
 
 install:
   - pip install --requirement requirements.txt
+  - pip install coveralls
 
 script:
   - trial tests/unit
