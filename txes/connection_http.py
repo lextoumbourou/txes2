@@ -1,12 +1,28 @@
 import urllib
 
-import treq
-import anyjson
 from twisted.web.client import HTTPConnectionPool
 from twisted.internet import reactor
 from zope import interface
+import treq
+import anyjson
 
 from txes import exceptions, interfaces, utils
+
+
+def _prepare_url(server, path, params):
+    """Prepare Elasticsearch connection URL."""
+    if not path.startswith('/'):
+        path = '/' + path
+
+    url = server + path
+
+    if params:
+        url = url + '?' + urllib.urlencode(params)
+
+    if not url.startswith("http://"):
+        url = "http://" + url
+
+    return url.encode('utf-8')
 
 
 class HTTPConnection(object):
@@ -34,31 +50,24 @@ class HTTPConnection(object):
         return self.pool.closeCachedConnections()
 
     def execute(self, method, path, body=None, params=None):
+        """Execute a query against a server."""
         server = self.servers.get()
         timeout = self.servers.timeout
-        if not path.startswith('/'):
-            path = '/' + path
-        url = server + path
 
-        if params:
-            url = url + '?' + urllib.urlencode(params)
+        url = _prepare_url(server, path, params)
 
         if not isinstance(body, basestring):
             body = anyjson.serialize(body)
 
-        if not url.startswith("http://"):
-            url = "http://" + url
-        url = url.encode('utf-8')
-
         def request_done(response):
             def _raise_error(body):
-                if response.code != 200:
-                    exceptions.raiseExceptions(response.code, body)
+                exceptions.raiseExceptions(response.code, body)
                 return body
 
-            return treq.json_content(response.original).addCallback(_raise_error)
+            return treq.json_content(response.original).addCallback(
+                _raise_error)
 
         d = treq.request(
-            method, url, data=body, pool=self.pool)
+            method, url, data=body, pool=self.pool, timeout=timeout)
         d.addCallback(request_done)
         return d
