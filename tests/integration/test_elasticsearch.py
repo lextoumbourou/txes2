@@ -13,11 +13,17 @@ class ElasticSearchIntegrationTest(TestCase):
     """Tests for the ElasticSearch class."""
 
     def setUp(self):
-        self.es = ElasticSearch(settings.URL)
+        self.es = ElasticSearch(
+            settings.URL, discover=False, discover_interval=False)
 
     def tearDown(self):
         """Close persistent connections to keep Reactor clean."""
         self.es.connection.close()
+
+    @inlineCallbacks
+    def test_cluster_nodes(self):
+        result = yield self.es.cluster_nodes()
+        self.assertTrue(len(result['nodes']) == 2)
 
     @inlineCallbacks
     def test_index(self):

@@ -40,7 +40,13 @@ Unit
 Integration
 ^^^^^^^^^^^
 
-Requires ElasticSearch to be running locally.
+1. Start Vagrant box, which runs an ElasticSearch cluster with ports ``9210`` and ``9211`` forwarded to the separate ElasticSearch instances.
+
+::
+
+    vagrant up
+
+2. Run integration tests.
 
 ::
 
