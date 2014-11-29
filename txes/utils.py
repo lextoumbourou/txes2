@@ -5,17 +5,17 @@ from txes import exceptions
 
 
 class ServerList(list):
-    def __init__(self, servers, retryTime=10, timeout=None):
+    def __init__(self, servers, retry_time=10, timeout=None):
         list.__init__(self, servers)
         self.dead = []
-        self.retryTime = retryTime
+        self.retry_time = retry_time
         self.timeout = timeout
 
     def get(self):
         if self.dead:
-            retryTime, server = self.dead.pop()
-            if retryTime > time.time():
-                self.dead.append((retryTime, server))
+            retry_time, server = self.dead.pop()
+            if retry_time > time.time():
+                self.dead.append((retry_time, server))
             else:
                 self.append(server)
         if not self:
@@ -25,4 +25,4 @@ class ServerList(list):
 
     def markDead(self, server):
         self.remove(server)
-        self.dead.insert(0, (time.time() + self.retryTime, server))
+        self.dead.insert(0, (time.time() + self.retry_time, server))

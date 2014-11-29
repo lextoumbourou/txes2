@@ -33,11 +33,11 @@ class HTTPConnection(object):
             self.servers.append(server)
 
     def connect(
-        self, servers=None, timeout=None, retryTime=10, *args, **kwargs
+        self, servers=None, timeout=None, retry_time=10, *args, **kwargs
     ):
         if isinstance(servers, (str, unicode)):
             servers = [servers]
-        self.servers = utils.ServerList(servers, retryTime=retryTime)
+        self.servers = utils.ServerList(servers, retry_time=retry_time)
         self.agents = {}
         self.timeout = timeout
 
