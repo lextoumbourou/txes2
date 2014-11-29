@@ -1,9 +1,7 @@
 """Integration tests for the ElasticSearch class."""
 
-from mock import patch
 from twisted.trial.unittest import TestCase
-from twisted.internet.defer import inlineCallbacks, succeed
-import treq
+from twisted.internet.defer import inlineCallbacks
 
 from txes.elasticsearch import ElasticSearch
 

@@ -3,7 +3,6 @@ import anyjson
 from twisted.internet import defer, reactor
 
 from txes import connection, exceptions
-import ipdb; 
 
 
 class ElasticSearch(object):

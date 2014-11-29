@@ -4,7 +4,9 @@ from txes import connection_http
 from txes import interfaces
 
 
-def connect(servers=None, timeout=None, retryTime=10, connection=None, *args, **kwargs):
+def connect(
+    servers=None, timeout=None, retryTime=10, connection=None, *args, **kwargs
+):
     """Construct an ElasticSearch connection."""
     if not connection:
         connection = connection_http.HTTPConnection()
