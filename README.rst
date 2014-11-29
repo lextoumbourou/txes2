@@ -45,6 +45,8 @@ Requires ElasticSearch to be running locally.
 Contributors
 ------------
 
-* `Jason Kölker <https://github.com/jkoelker>`_ - original author
-* `Zuhaib Siddique <https://github.com/zsiddique>`_
-* `Lex Toumbourou <https://github.com/lextoumbourou>`_ - current maintainer
+If you contribute to this project, feel free to add your name and/or Github username here.
+
+* `Jason Kölker (@jkoelker) <https://github.com/jkoelker>`_ - original author
+* `Zuhaib Siddique (@zsiddique) <https://github.com/zsiddique>`_
+* `Lex Toumbourou (@lextoumbourou) <https://github.com/lextoumbourou>`_ - current maintainer
