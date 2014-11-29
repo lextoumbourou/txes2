@@ -1,13 +1,12 @@
 import urllib
 
+import treq
 import anyjson
-from twisted.web import client
+from twisted.web.client import HTTPConnectionPool
+from twisted.internet import reactor
 from zope import interface
 
 from txes import exceptions, interfaces, utils
-
-
-DEFAULT_SERVER = "127.0.0.1:9200"
 
 
 class HTTPConnection(object):
@@ -17,18 +16,22 @@ class HTTPConnection(object):
         if server not in self.servers:
             self.servers.append(server)
 
-    def connect(self, servers=None, timeout=None, retryTime=10,
-                *args, **kwargs):
-        if not servers:
-            servers = [DEFAULT_SERVER]
-        elif isinstance(servers, (str, unicode)):
+    def connect(
+        self, servers=None, timeout=None, retryTime=10, *args, **kwargs
+    ):
+        if isinstance(servers, (str, unicode)):
             servers = [servers]
-        self.servers = utils.ServerList(
-            servers, retryTime=retryTime, timeout=timeout)
+        self.servers = utils.ServerList(servers, retryTime=retryTime)
         self.agents = {}
+        self.timeout = timeout
+
+        persistent = kwargs.get('persistent', False)
+        self.pool = kwargs.get('pool') or HTTPConnectionPool(
+            reactor, persistent)
 
     def close(self):
-        pass
+        """Close up all persistent connections."""
+        return self.pool.closeCachedConnections()
 
     def execute(self, method, path, body=None, params=None):
         server = self.servers.get()
@@ -45,24 +48,17 @@ class HTTPConnection(object):
 
         if not url.startswith("http://"):
             url = "http://" + url
+        url = url.encode('utf-8')
 
-        def decode_json(body_string):
-            return anyjson.deserialize(body_string)
+        def request_done(response):
+            def _raise_error(body):
+                if response.code != 200:
+                    exceptions.raiseExceptions(response.code, body)
+                return body
 
-        def eb(reason):
-            reason.trap(client.error.Error)
-            status = int(reason.value.status)
-            try:
-                body = decode_json(reason.value.response)
-            except:
-                body = {'error': reason.value.response}
-            if status != 200:
-                exceptions.raiseExceptions(status, body)
-            return body
+            return treq.json_content(response.original).addCallback(_raise_error)
 
-        d = client.getPage(
-            str(url), method=method, postdata=body, timeout=timeout,
-            headers={'Content-Type': 'application/json'})
-        d.addCallback(decode_json)
-        d.addErrback(eb)
+        d = treq.request(
+            method, url, data=body, pool=self.pool)
+        d.addCallback(request_done)
         return d

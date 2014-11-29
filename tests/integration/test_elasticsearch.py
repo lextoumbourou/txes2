@@ -3,6 +3,7 @@
 from mock import patch
 from twisted.trial.unittest import TestCase
 from twisted.internet.defer import inlineCallbacks, succeed
+import treq
 
 from txes.elasticsearch import ElasticSearch
 
@@ -15,6 +16,10 @@ class ElasticSearchIntegrationTest(TestCase):
 
     def setUp(self):
         self.es = ElasticSearch(settings.URL)
+
+    def tearDown(self):
+        """Close persistent connections to keep Reactor clean."""
+        self.es.connection.close()
 
     @inlineCallbacks
     def test_index(self):

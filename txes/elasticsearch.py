@@ -3,6 +3,7 @@ import anyjson
 from twisted.internet import defer, reactor
 
 from txes import connection, exceptions
+import ipdb; 
 
 
 class ElasticSearch(object):
@@ -11,9 +12,9 @@ class ElasticSearch(object):
 
     Inspired by (code stolen from) pyes and paisley
     """
-    def __init__(self, servers=None, timeout=30, bulkSize=400,
+    def __init__(self, servers='127.0.0.1:9200', timeout=30, bulkSize=400,
                  discover=True, retryTime=10, discoveryInterval=300,
-                 defaultIndexes=None, autorefresh=False):
+                 defaultIndexes=None, autorefresh=False, *args, **kwargs):
         if isinstance(servers, basestring):
             servers = [servers]
         else:
@@ -37,7 +38,9 @@ class ElasticSearch(object):
 
         self.connection = connection.connect(servers=servers,
                                              timeout=timeout,
-                                             retryTime=retryTime)
+                                             retryTime=retryTime,
+                                             *args,
+                                             **kwargs)
         if discover:
             self._performDiscovery()
 
