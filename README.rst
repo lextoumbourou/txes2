@@ -3,10 +3,12 @@ txes2
 
 A PyES compatible-ish ElasticSearch Twisted client.
 
-|travis|
+|travis| |coveralls|
 
 .. |travis| image:: https://travis-ci.org/lextoumbourou/txes2.svg?branch=master
-    :target: https://travis-ci.org/lextoumbourou/txes2
+   :target: https://travis-ci.org/lextoumbourou/txes2
+.. |coveralls| image:: https://coveralls.io/repos/lextoumbourou/txes2/badge.png?branch=master
+   :target: https://coveralls.io/r/lextoumbourou/txes2?branch=master
 
 Before We Begin
 ---------------
