@@ -2,3 +2,6 @@
 _trial_temp
 .coverage
 .vagrant
+build/
+dist/
+*.egg-info/
