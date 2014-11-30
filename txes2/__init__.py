@@ -1,1 +1,1 @@
-from txes.elasticsearch import ElasticSearch  # noqa
+from txes2.elasticsearch import ElasticSearch  # noqa

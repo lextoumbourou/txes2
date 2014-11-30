@@ -2,7 +2,7 @@ import anyjson
 
 from twisted.internet import defer, reactor
 
-from txes import connection, exceptions
+from . import connection, exceptions
 
 
 class ElasticSearch(object):

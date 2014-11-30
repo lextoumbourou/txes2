@@ -1,7 +1,7 @@
 from zope.interface import verify
 
-from txes import connection_http
-from txes import interfaces
+from . import connection_http
+from . import interfaces
 
 
 def connect(

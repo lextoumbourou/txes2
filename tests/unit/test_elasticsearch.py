@@ -11,7 +11,7 @@ class ElasticSearchTest(TestCase):
 
     """Tests for the ElasticSearch class."""
 
-    @patch('txes.elasticsearch.connection')
+    @patch('txes2.elasticsearch.connection')
     def setUp(self, conn_mock):
         self.es = ElasticSearch('127.0.0.1:9200', discover=False)
 

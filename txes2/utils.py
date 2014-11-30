@@ -1,7 +1,7 @@
 import time
 import random
 
-from txes import exceptions
+from . import exceptions
 
 
 class ServerList(list):

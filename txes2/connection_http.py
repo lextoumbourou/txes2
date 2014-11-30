@@ -6,7 +6,7 @@ from zope import interface
 import treq
 import anyjson
 
-from txes import exceptions, interfaces, utils
+from . import exceptions, interfaces, utils
 
 
 def _prepare_url(server, path, params):
