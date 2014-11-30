@@ -13,12 +13,7 @@ A PyES compatible-ish ElasticSearch Twisted client.
    :target: https://pypi.python.org/pypi/txes2/
 
 
-Before We Begin
----------------
-
-This repo is simply a fork of `txes <https://github.com/jkoelker/txes>`_, however, the API has changed enough that I believe a name change was warranted. I also am not representing it as a fork on Github to avoid getting it confused with the 12 other forks of txes that have taken the software in different directions.
-
-So for clarify: **I am not the original author of this library**, `jkoelker <https://github.com/jkoelker>`_ is. Thanks to all the other contributers who helped make this happen, listed in the `Contributors <https://github.com/lextoumbourou/txes2#contributors>`_  section.
+*Note: This repo is simply a fork of `txes <https://github.com/jkoelker/txes>`_, however, the API has changed enough that I believe a name change was warranted. I also am not representing it as a fork on Github to avoid getting it confused with the 12 other forks of txes that have taken the software in different directions. So for clarity: I am not the original author of this library, `jkoelker <https://github.com/jkoelker>`_ is. Thanks to all the other contributers who helped make this happen, listed in the `Contributors <https://github.com/lextoumbourou/txes2#contributors>`_  section.*
 
 
 Documentation
