@@ -75,3 +75,25 @@ class ElasticSearchIntegrationTest(TestCase):
         result = yield self.es.analyze('Hello world', settings.INDEX)
         self.assertTrue('tokens' in result)
         self.assertTrue(len(result['tokens']) == 3)
+
+    @inlineCallbacks
+    def test_delete(self):
+        self._mock = {'found': True, '_id': '2'}
+
+        data = {'id': 2, 'name': 'Some Doc'}
+        yield self.es.index(data, settings.INDEX, settings.DOC_TYPE, id=2)
+        result = yield self.es.delete(settings.INDEX, settings.DOC_TYPE, id=2)
+        self.assertTrue(result['found'])
+        self.assertTrue(result['_id'] == '2')
+
+    @inlineCallbacks
+    def test_get(self):
+        self._mock = {
+            '_source': {'id': 3, 'name': 'Some Doc'},
+            '_index': 'test_index', 'found': True}
+
+        data = {'id': 3, 'name': 'Some Doc'}
+        yield self.es.index(data, settings.INDEX, settings.DOC_TYPE, id=3)
+        result = yield self.es.get(settings.INDEX, settings.DOC_TYPE, 3)
+        self.assertTrue(result['found'])
+        self.assertTrue('_source' in result)
