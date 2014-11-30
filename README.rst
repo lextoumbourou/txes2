@@ -10,6 +10,7 @@ A PyES compatible-ish ElasticSearch Twisted client.
 .. |coveralls| image:: https://coveralls.io/repos/lextoumbourou/txes2/badge.png?branch=master
    :target: https://coveralls.io/r/lextoumbourou/txes2?branch=master
 
+
 Before We Begin
 ---------------
 
@@ -24,38 +25,13 @@ Documentation
 Available at `Read The Docs <txes2.readthedocs.org>`_.
 
 
-Running Tests
--------------
-
-Unit
-^^^^
-
-::
-
-    ./bin/unit
-
-Integration
-^^^^^^^^^^^
-
-1. Start Vagrant box, which runs an ElasticSearch cluster with ports ``9210`` and ``9211`` forwarded to the separate ElasticSearch instances.
-
-::
-
-    vagrant up
-
-2. Run integration tests.
-
-::
-
-    ./bin/integration
-
-
 .. _contributors:
 
 License
 -------
 
 BSD (as per original project).
+
 
 Changelog
 ---------
