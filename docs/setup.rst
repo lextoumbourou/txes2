@@ -7,7 +7,9 @@ Setup
 Installing via pip
 ------------------
 
-Coming soon.
+::
+
+    $ pip install txes2
 
 
 Installing from source
