@@ -17,15 +17,12 @@ This repo is simply a fork of `txes <https://github.com/jkoelker/txes>`_, howeve
 
 So for clarify: **I am not the original author of this library**, `jkoelker <https://github.com/jkoelker>`_ is. Thanks to all the other contributers who helped make this happen, listed in the `Contributors <https://github.com/lextoumbourou/txes2#contributors>`_  section.
 
-Status
-------
-
-WIP - not yet production ready.
 
 Documentation
 -------------
 
-Coming soon.
+Available at `Read The Docs <txes2.readthedocs.org>`_.
+
 
 Running Tests
 -------------
@@ -35,7 +32,7 @@ Unit
 
 ::
 
-    trial tests/unit
+    ./bin/unit
 
 Integration
 ^^^^^^^^^^^
@@ -50,10 +47,22 @@ Integration
 
 ::
 
-    trial tests/integration
+    ./bin/integration
 
 
 .. _contributors:
+
+License
+-------
+
+BSD (as per original project).
+
+Changelog
+---------
+
+* 0.1.0
+  * PEP8ified API.
+  * Added docs, tests & PyPi.
 
 Contributors
 ------------
