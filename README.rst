@@ -9,9 +9,9 @@ A PyES compatible-ish ElasticSearch Twisted client.
    :target: https://travis-ci.org/lextoumbourou/txes2
 .. |coveralls| image:: https://coveralls.io/repos/lextoumbourou/txes2/badge.png?branch=master
    :target: https://coveralls.io/r/lextoumbourou/txes2?branch=master
-.. pypi:: https://pypip.in/version/txes2/badge.svg
+.. |pypi| image:: https://pypip.in/version/txes2/badge.svg
    :target: https://pypi.python.org/pypi/txes2/
-   :alt: Latest Version
+
 
 Before We Begin
 ---------------
