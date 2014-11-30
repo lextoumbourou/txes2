@@ -7,6 +7,7 @@ from twisted.trial.unittest import TestCase
 from twisted.internet.defer import inlineCallbacks
 
 from txes2.elasticsearch import ElasticSearch
+from txes2.exceptions import ElasticSearchException
 
 from . import settings
 
@@ -22,12 +23,18 @@ class ElasticSearchIntegrationTest(TestCase):
     def _get_mock(self, *args, **kwargs):
         return self._mock
 
+    @inlineCallbacks
     def setUp(self):
         self.es = ElasticSearch(
             settings.URL, discover=False, discover_interval=False)
         if use_mock():
             self.es.connection = Mock()
             self.es.connection.execute = self._get_mock
+        else:
+            try:
+                yield self.es.create_index(settings.INDEX)
+            except ElasticSearchException:
+                pass
 
     def tearDown(self):
         """Close persistent connections to keep Reactor clean."""
@@ -57,3 +64,14 @@ class ElasticSearchIntegrationTest(TestCase):
 
         result = yield self.es.mget([1], settings.INDEX, settings.DOC_TYPE)
         self.assertTrue('docs' in result)
+
+    @inlineCallbacks
+    def test_analyze(self):
+        self._mock = {'tokens': [
+            {'end_offset': 6, 'token': u'text'},
+            {'end_offset': 15, 'token': 'hello'},
+            {'end_offset': 21, 'token': 'world'}]}
+
+        result = yield self.es.analyze('Hello world', settings.INDEX)
+        self.assertTrue('tokens' in result)
+        self.assertTrue(len(result['tokens']) == 3)
