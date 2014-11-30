@@ -8,8 +8,7 @@ install:
   - pip install coveralls
 
 script:
-  - coverage run --source="./txes2" `which trial` tests/unit && coverage report
-  - flake8 .
+  - ./bin/unit
 
 after_success:
   - coveralls

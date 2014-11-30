@@ -1,0 +1,3 @@
+#!/bin/bash
+coverage run --source="./txes2" `which trial` tests && coverage report
+flake8 .

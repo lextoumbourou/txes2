@@ -1,0 +1,1 @@
+USE_MOCKS=1 ./bin/integration
