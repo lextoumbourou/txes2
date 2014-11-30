@@ -60,9 +60,12 @@ BSD (as per original project).
 Changelog
 ---------
 
-* 0.1.0
-  * PEP8ified API.
-  * Added docs, tests & PyPi.
+0.1.0
+^^^^^
+
+- PEP8ified API.
+- Added docs, tests & PyPi.
+
 
 Contributors
 ------------
