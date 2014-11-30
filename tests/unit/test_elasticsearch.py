@@ -4,7 +4,7 @@ from mock import patch
 from twisted.trial.unittest import TestCase
 from twisted.internet.defer import inlineCallbacks, succeed
 
-from txes.elasticsearch import ElasticSearch
+from txes2.elasticsearch import ElasticSearch
 
 
 class ElasticSearchTest(TestCase):
