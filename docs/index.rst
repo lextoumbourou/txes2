@@ -1,5 +1,5 @@
-txes - ElasticSearch client for Twisted
-=======================================
+txes2 - ElasticSearch client for Twisted
+========================================
 
 ``txes2`` is a PyES-like ElasticSearch client for Twisted applications. ``txes2`` is a fork of `txes <https://github.com/jkoelker/txes>`_ with a more `PEP8 <https://www.python.org/dev/peps/pep-0008>`_-friendly interface. Credits are available at the project's `Contributors section <https://github.com/lextoumbourou/txes2#contributors>`_.
 
@@ -15,10 +15,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   usage 
    setup 
-   contributing
+   usage 
    api 
+   contributing
 
 
 Indices and tables
