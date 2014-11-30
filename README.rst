@@ -20,7 +20,7 @@ I also am not representing it as a fork on Github to avoid getting it confused w
 Documentation
 -------------
 
-Available at `Read The Docs <txes2.readthedocs.org>`_.
+Available at `Read The Docs <https://txes2.readthedocs.org/en/latest/>`_.
 
 
 .. _contributors:
