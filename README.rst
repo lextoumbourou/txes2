@@ -1,7 +1,7 @@
 txes2
 =====
 
-A PyES compatible-ish ElasticSearch Twisted client.
+A Twisted ElasticSearch client loosely based on PyES.
 
 |travis| |coveralls| |pypi|
 
