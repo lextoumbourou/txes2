@@ -34,6 +34,12 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.1.1
+^^^^^
+
+- Fixed broken requirements path.
+- Doc updates.
+
 0.1.0
 ^^^^^
 

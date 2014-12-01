@@ -41,9 +41,8 @@ class HTTPConnection(object):
         self.agents = {}
         self.timeout = timeout
 
-        persistent = kwargs.get('persistent', False)
-        self.pool = kwargs.get('pool') or HTTPConnectionPool(
-            reactor, persistent)
+        self.persistent = kwargs.get('persistent')
+        self.pool = kwargs.get('pool')
 
     def close(self):
         """Close up all persistent connections."""
@@ -68,6 +67,7 @@ class HTTPConnection(object):
                 _raise_error)
 
         d = treq.request(
-            method, url, data=body, pool=self.pool, timeout=timeout)
+            method, url, data=body, pool=self.pool,
+            persistent=self.persistent, timeout=timeout)
         d.addCallback(request_done)
         return d
