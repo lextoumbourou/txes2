@@ -34,12 +34,16 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.1.2
+^^^^^
+
+- Split requirements into main/dev.
+
 0.1.1
 ^^^^^
 
 - Use treq's persistent arg if no pool passed in.
 - Fixed broken requirements path.
-- Split requirements into main/dev.
 - Doc updates.
 
 0.1.0

@@ -9,7 +9,7 @@ reqs = [str(ir.req) for ir in install_reqs]
 
 setup(
     name='txes2',
-    version='0.1.1',
+    version='0.1.2',
     description="An Elasticsearch client for Twisted",
     classifiers=[],
     keywords='twisted elasticsearch',
