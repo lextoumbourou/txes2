@@ -37,6 +37,7 @@ Changelog
 0.1.1
 ^^^^^
 
+- Use treq's persistent arg if no pool passed in.
 - Fixed broken requirements path.
 - Doc updates.
 
