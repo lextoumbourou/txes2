@@ -1,7 +1,5 @@
 import urllib
 
-from twisted.web.client import HTTPConnectionPool
-from twisted.internet import reactor
 from zope import interface
 import treq
 import anyjson
