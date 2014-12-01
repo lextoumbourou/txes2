@@ -1,0 +1,3 @@
+Twisted==14.0.2
+anyjson==0.3.3
+treq==0.2.1
