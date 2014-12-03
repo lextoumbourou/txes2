@@ -39,7 +39,7 @@ class HTTPConnection(object):
         self.agents = {}
         self.timeout = timeout
 
-        self.persistent = kwargs.get('persistent')
+        self.persistent = kwargs.get('persistent', True)
         self.pool = kwargs.get('pool')
 
     def close(self):
