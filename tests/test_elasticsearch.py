@@ -94,3 +94,12 @@ class ElasticSearchIntegrationTest(TestCase):
         result = yield self.es.get(settings.INDEX, settings.DOC_TYPE, 3)
         self.assertTrue(result['found'])
         self.assertTrue('_source' in result)
+
+    @inlineCallbacks
+    def test_status(self):
+        self._mock = {
+            'indices': {settings.INDEX: {'docs': {}}, 'shards': []}}
+
+        result = yield self.es.status(settings.INDEX)
+        self.assertTrue('indices' in result)
+        self.assertTrue(settings.INDEX in result['indices'])
