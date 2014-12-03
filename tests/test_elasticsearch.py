@@ -26,7 +26,8 @@ class ElasticSearchIntegrationTest(TestCase):
     @inlineCallbacks
     def setUp(self):
         self.es = ElasticSearch(
-            settings.URL, discover=False, discover_interval=False)
+            settings.URL, discover=False,
+            discover_interval=False, persistent=False)
         if use_mock():
             self.es.connection = Mock()
             self.es.connection.execute = self._get_mock
@@ -35,10 +36,6 @@ class ElasticSearchIntegrationTest(TestCase):
                 yield self.es.create_index(settings.INDEX)
             except ElasticSearchException:
                 pass
-
-    def tearDown(self):
-        """Close persistent connections to keep Reactor clean."""
-        self.es.connection.close()
 
     @inlineCallbacks
     def test_cluster_nodes(self):
