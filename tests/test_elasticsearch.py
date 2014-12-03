@@ -103,3 +103,10 @@ class ElasticSearchIntegrationTest(TestCase):
         result = yield self.es.status(settings.INDEX)
         self.assertTrue('indices' in result)
         self.assertTrue(settings.INDEX in result['indices'])
+
+    @inlineCallbacks
+    def test_get_indices(self):
+        self._mock = {'indices': {settings.INDEX: {'docs': {'num_docs': 1}}}}
+
+        result = yield self.es.get_indices(include_aliases=True)
+        self.assertTrue(settings.INDEX in result)

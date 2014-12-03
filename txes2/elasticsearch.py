@@ -154,9 +154,9 @@ class ElasticSearch(object):
 
     def get_indices(self, include_aliases=False):
         """
-        Get a dict holding an entry for each index which exits.
+        Get a dict holding an entry for each index which exists.
 
-        If includeAliases is True, the dict will also contain entries for
+        If ``include_aliases`` is True, the dict will also contain entries for
         aliases.
 
         The key for each entry in the dict is the index or alias name. The
@@ -173,8 +173,9 @@ class ElasticSearch(object):
                 info = indices[index]
                 num_docs = info['docs']['num_docs']
                 result[index] = {'num_docs': num_docs}
-                if not include_aliases:
+                if not include_aliases or 'aliases' not in info:
                     continue
+
                 for alias in info['aliases']:
                     if alias not in result:
                         result[alias] = dict()
