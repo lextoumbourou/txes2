@@ -110,3 +110,12 @@ class ElasticSearchIntegrationTest(TestCase):
 
         result = yield self.es.get_indices(include_aliases=True)
         self.assertTrue(settings.INDEX in result)
+
+    @inlineCallbacks
+    def test_count(self):
+        self._mock = {'count': 11, '_shards': {}}
+
+        result = yield self.es.count(
+            {'query': {'match': {'name': 'Some Doc'}}})
+        self.assertTrue('count' in result)
+        self.assertTrue(isinstance(result['count'], int))
