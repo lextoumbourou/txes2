@@ -58,7 +58,7 @@ class HTTPConnection(object):
 
         def request_done(response):
             def _raise_error(body):
-                exceptions.raiseExceptions(response.code, body)
+                exceptions.raise_exceptions(response.code, body)
                 return body
 
             return treq.json_content(response.original).addCallback(

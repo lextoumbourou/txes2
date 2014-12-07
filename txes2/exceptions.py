@@ -81,7 +81,7 @@ exception_patterns_trailing = {
 }
 
 
-def raiseExceptions(status, result):
+def raise_exceptions(status, result):
     """
     Raise an exception if the result is an error ( status > 400 )
     """
