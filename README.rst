@@ -3,7 +3,7 @@ txes2
 
 A Twisted ElasticSearch client loosely based on PyES.
 
-|travis| |coveralls| |pypi|
+|travis| |coveralls| |pypi| |docs|
 
 .. |travis| image:: https://travis-ci.org/lextoumbourou/txes2.svg?branch=master
    :target: https://travis-ci.org/lextoumbourou/txes2
@@ -11,6 +11,8 @@ A Twisted ElasticSearch client loosely based on PyES.
    :target: https://coveralls.io/r/lextoumbourou/txes2?branch=master
 .. |pypi| image:: https://pypip.in/version/txes2/badge.svg
    :target: https://pypi.python.org/pypi/txes2/
+.. |docs| image:: https://readthedocs.org/projects/txes2/badge/?version=latest
+   :target: https://readthedocs.org/projects/txes2/?badge=latest
 
 **Note:** This repo is simply a fork of `txes <https://github.com/jkoelker/txes>`_, however, the API has changed enough that I believe a name change was warranted.
 
