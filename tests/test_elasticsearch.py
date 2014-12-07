@@ -119,3 +119,22 @@ class ElasticSearchIntegrationTest(TestCase):
             {'query': {'match': {'name': 'Some Doc'}}})
         self.assertTrue('count' in result)
         self.assertTrue(isinstance(result['count'], int))
+
+    @inlineCallbacks
+    def test_cluster_health(self):
+        self.assertRaises(ValueError, self.es.cluster_health, 'blah')
+
+        self._mock = {'status': 'green', 'number_of_nodes': 2}
+
+        result = yield self.es.cluster_health(
+            wait_for_status='green', wait_for_relocating_shards=True,
+            wait_for_nodes=True)
+        self.assertTrue('status' in result)
+        self.assertTrue(result['number_of_nodes'] == 2)
+
+    @inlineCallbacks
+    def test_get_mapping(self):
+        self._mock = {'test_index': {'mappings': {}}}
+        result = yield self.es.get_mapping(settings.DOC_TYPE, settings.INDEX)
+        self.assertTrue(settings.INDEX in result)
+        self.assertTrue('mappings' in result[settings.INDEX])
