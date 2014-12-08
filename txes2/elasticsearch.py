@@ -638,18 +638,6 @@ class ElasticSearch(object):
         d.addCallback(scroll)
         return d
 
-    def reindex(self, query, indexes=None, doc_types=None, **params):
-        """Execute a query against one or more indices & reindex hits."""
-        indices = self._validate_indexes(indexes)
-        if not doc_types:
-            doc_types = []
-        elif isinstance(doc_types, basestring):
-            doc_types = [doc_types]
-        path = self._make_path([','.join(indices), ','.join(doc_types),
-                               '_reindexbyquery'])
-        d = self._send_request('POST', path, body=query, params=params)
-        return d
-
     def count(self, query, indexes=None, doc_types=None, **params):
         """Execute a query against one or more indices & get the hit count."""
         indices = self._validate_indexes(indexes)
