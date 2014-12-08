@@ -148,3 +148,10 @@ class ElasticSearchIntegrationTest(TestCase):
         result = yield self.es.collect_info()
         self.assertTrue('server' in result)
         self.assertTrue('allinfo' in result)
+
+    @inlineCallbacks
+    def test_add_alias(self):
+        self._mock = {'acknowledged': True}
+
+        result = yield self.es.add_alias('test_alias', settings.INDEX)
+        self.assertTrue('acknowledged' in result)
