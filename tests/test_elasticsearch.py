@@ -138,3 +138,13 @@ class ElasticSearchIntegrationTest(TestCase):
         result = yield self.es.get_mapping(settings.DOC_TYPE, settings.INDEX)
         self.assertTrue(settings.INDEX in result)
         self.assertTrue('mappings' in result[settings.INDEX])
+
+    @inlineCallbacks
+    def test_collect_info(self):
+        self._mock = {
+            'status': 200, 'cluster_name': 'test', 'version': {},
+            'name': 'Jester', 'tagline': 'You Know, for Search'}
+
+        result = yield self.es.collect_info()
+        self.assertTrue('server' in result)
+        self.assertTrue('allinfo' in result)
