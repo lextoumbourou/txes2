@@ -155,3 +155,11 @@ class ElasticSearchIntegrationTest(TestCase):
 
         result = yield self.es.add_alias('test_alias', settings.INDEX)
         self.assertTrue('acknowledged' in result)
+
+    @inlineCallbacks
+    def test_optimize(self):
+        self._mock = {'_shards': {'successful': 10, 'failed': 0, 'total': 10}}
+
+        result = yield self.es.optimize(settings.INDEX, max_num_segments=1)
+        self.assertTrue('_shards' in result)
+        self.assertTrue(result['_shards']['failed'] == 0)
