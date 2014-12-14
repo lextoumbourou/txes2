@@ -534,7 +534,8 @@ class ElasticSearch(object):
 
         path = self._make_path(
             [','.join(indices), ','.join(doc_types), '_query'])
-        d = self._send_request('DELETE', path, params=params)
+        body = {'query': query}
+        d = self._send_request('DELETE', path, body, params=params)
         return d
 
     def delete_mapping(self, index, doc_type):

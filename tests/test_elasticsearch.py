@@ -7,7 +7,7 @@ from twisted.trial.unittest import TestCase
 from twisted.internet.defer import inlineCallbacks
 
 from txes2.elasticsearch import ElasticSearch
-from txes2.exceptions import ElasticSearchException
+from txes2.exceptions import ElasticSearchException, NotFoundException
 
 from . import settings
 
@@ -163,3 +163,37 @@ class ElasticSearchIntegrationTest(TestCase):
         result = yield self.es.optimize(settings.INDEX, max_num_segments=1)
         self.assertTrue('_shards' in result)
         self.assertTrue(result['_shards']['failed'] == 0)
+
+    @inlineCallbacks
+    def test_delete_by_query(self):
+        def raise_exception(*args, **kwargs):
+            raise NotFoundException('Item not found')
+
+        self._mock = {'_id': 'someid'}
+        data = {'name': 'blah'}
+        result = yield self.es.index(data, settings.INDEX, settings.DOC_TYPE)
+        doc_id = result['_id']
+
+        self._mock = {'_id': 'someid', 'found': True}
+        result = yield self.es.get(
+            settings.INDEX, settings.DOC_TYPE, id=doc_id)
+        self.assertTrue(result['found'])
+
+        self._mock = {}
+        query = {'term': {'name': 'blah'}}
+        result = yield self.es.delete_by_query(
+            settings.INDEX, settings.DOC_TYPE, query)
+
+        if use_mock():
+            # Reset mock
+            self.es.connection.execute = Mock()
+            self.es.connection.execute.side_effect = raise_exception
+
+        has_failed = False
+        try:
+            yield self.es.get(
+                settings.INDEX, settings.DOC_TYPE, id=doc_id)
+        except NotFoundException:
+            has_failed = True
+
+        self.assertTrue(has_failed)
