@@ -37,6 +37,13 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.1.4
+^^^^^
+
+- Fixed ``delete_by_query`` method.
+- Increased test coverage.
+- Removed ``reindex`` method (relied on an obscure fork of ES).
+
 0.1.3
 ^^^^^
 
