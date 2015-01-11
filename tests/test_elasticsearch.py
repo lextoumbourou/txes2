@@ -1,4 +1,4 @@
-"""Integration tests for the ElasticSearch class."""
+"""Tests for the ElasticSearch class."""
 
 import os
 from mock import Mock
