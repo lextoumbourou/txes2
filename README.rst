@@ -37,6 +37,12 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.1.5
+^^^^^
+
+- Fixed ``scan`` method.
+- Increased test coverage.
+
 0.1.4
 ^^^^^
 
