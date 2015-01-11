@@ -197,3 +197,11 @@ class ElasticSearchIntegrationTest(TestCase):
             has_failed = True
 
         self.assertTrue(has_failed)
+
+    @inlineCallbacks
+    def test_scan(self):
+        self._mock = {'hits': {'hits': []}, '_scroll_id': '1234'}
+
+        query = {'query': {'term': {'name': 'blah'}}}
+        scroller = yield self.es.scan(query, settings.INDEX, settings.DOC_TYPE)
+        self.assertTrue('_scroll_id' in scroller.results)

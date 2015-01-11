@@ -563,7 +563,7 @@ class ElasticSearch(object):
             list of ids: index and doc_type are required
         """
         if not ids:
-            return []
+            return {'docs': []}
 
         body = []
         for value in ids:
@@ -600,7 +600,7 @@ class ElasticSearch(object):
         return d
 
     def scan(
-        self, query, indexes=None, doc_types=None,
+        self, query, indexes=None, doc_type=None,
         scroll_timeout='10m', **params
     ):
         """
@@ -611,8 +611,9 @@ class ElasticSearch(object):
         """
 
         class Scroller(object):
-            def __init__(self, results):
+            def __init__(self, results, es_parent):
                 self.results = results
+                self.es_parent = es_parent
 
             def __iter__(self):
                 return self
@@ -624,17 +625,18 @@ class ElasticSearch(object):
                 return results
 
             def next(self):
-                scroll_id = self.results['_scroll_id']
-                d = self._send_request('GET', '_search/scroll', scroll_id,
-                                       {'scroll': scroll_timeout})
+                scroll_id = str(self.results['_scroll_id'])
+                d = self.es_parent._send_request(
+                    'GET', '_search/scroll', scroll_id,
+                    {'scroll': scroll_timeout})
                 d.addCallback(self._set_results)
                 return
 
         def scroll(results):
-            return Scroller(results)
+            return Scroller(results, self)
 
         d = self.search(
-            query=query, indexes=indexes, doc_types=doc_types,
+            query=query, indexes=indexes, doc_type=doc_type,
             search_types='scan', scroll=scroll_timeout, **params)
         d.addCallback(scroll)
         return d
