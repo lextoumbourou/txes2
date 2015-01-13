@@ -37,6 +37,11 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.1.6
+^^^^^
+
+- Fixed issue with setup.py on Pip versions > 6.
+
 0.1.5
 ^^^^^
 
