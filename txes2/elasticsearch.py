@@ -1,5 +1,6 @@
-import anyjson
+from urllib import quote
 
+import anyjson
 from twisted.internet import defer, reactor
 
 from . import connection, exceptions
@@ -57,7 +58,7 @@ class ElasticSearch(object):
 
     def _make_path(self, components):
         """Build a path from a list of components."""
-        return '/' + '/'.join([str(c) for c in components if c])
+        return '/' + '/'.join([quote(str(c), '') for c in components if c])
 
     def _perform_discovery(self):
         def cb(data):

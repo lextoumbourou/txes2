@@ -205,3 +205,17 @@ class ElasticSearchIntegrationTest(TestCase):
         query = {'query': {'term': {'name': 'blah'}}}
         scroller = yield self.es.scan(query, settings.INDEX, settings.DOC_TYPE)
         self.assertTrue('_scroll_id' in scroller.results)
+
+    @inlineCallbacks
+    def test_path_is_encoded_properly(self):
+        data = {'name': 'Yo breh'}
+        test_id = 'some/id'
+
+        self._mock = {'_id': test_id}
+
+        yield self.es.index(
+            data, settings.INDEX, '{}-2'.format(settings.DOC_TYPE), id=test_id)
+        result = yield self.es.get(
+            settings.INDEX, '{}-2'.format(settings.DOC_TYPE), id=test_id)
+
+        self.assertTrue(result['_id'] == test_id)
