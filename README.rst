@@ -17,7 +17,7 @@ A Twisted ElasticSearch client loosely based on PyES.
 Before We Begin
 ---------------
 
-This repo is simply a fork of `txes <https://github.com/jkoelker/txes>`_, however, the API has changed enough that I believe a name change was warranted. I also am not representing it as a fork on Github to avoid getting it confused with the 12 other forks of txes that have taken the software in different directions. So for clarity: I am not the original author of this library, `jkoelker <https://github.com/jkoelker>`_ is. Thanks to all the other contributers who helped make this happen, listed in the `Contributors <https://github.com/lextoumbourou/txes2#contributors>`_ section.
+This repo is simply a fork of `txes <https://github.com/jkoelker/txes>`_, however, the API has changed enough that I believe a name change was warranted. I also am not representing it as a fork on Github to avoid getting it confused with the 12 other forks of txes that have taken the software in different directions. So for clarity: I am not the original author of this library, `jkoelker <https://github.com/jkoelker>`_ is. Thanks to all the other contributers who helped make this happen, listed in the Contributors_ section.
 
 
 Documentation
@@ -26,7 +26,7 @@ Documentation
 Available at `Read The Docs <https://txes2.readthedocs.org/en/latest/>`_.
 
 
-.. _contributors:
+.. _Contributors:
 
 License
 -------
