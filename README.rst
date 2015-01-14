@@ -37,6 +37,12 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.1.7
+^^^^^
+
+- Ensure url path components are quoted.
+- Fixed used of Pip session (thanks @reversefold).
+
 0.1.6
 ^^^^^
 
