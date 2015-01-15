@@ -1,10 +1,5 @@
 from setuptools import setup
-from pip.req import parse_requirements
-from pip.download import PipSession
 
-install_reqs = parse_requirements(
-    'requirements/main.txt', session=PipSession())
-reqs = [str(ir.req) for ir in install_reqs]
 
 setup(
     name='txes2',
@@ -18,7 +13,7 @@ setup(
     packages=['txes2'],
     include_package_data=True,
     zip_safe=False,
-    install_requires=reqs,
+    install_requires=['Twisted', 'anyjson', 'treq'],
     classifiers=[
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
