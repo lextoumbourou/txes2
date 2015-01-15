@@ -37,6 +37,11 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.1.8
+^^^^^
+
+- Removed pip internals from setup.py all together.
+
 0.1.7
 ^^^^^
 
