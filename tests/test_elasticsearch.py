@@ -37,6 +37,12 @@ class ElasticSearchIntegrationTest(TestCase):
             except ElasticSearchException:
                 pass
 
+    def test_can_handle_basestring_input(self):
+        tmp_es = ElasticSearch(
+            'server', default_indexes='index', discover=False)
+        self.assertTrue(isinstance(tmp_es.connection.servers, list))
+        self.assertTrue(isinstance(tmp_es.default_indexes, list))
+
     @inlineCallbacks
     def test_cluster_nodes(self):
         self._mock = {'cluster_name': 'test', 'nodes': {'id1': {}, 'id2': {}}}
@@ -219,3 +225,26 @@ class ElasticSearchIntegrationTest(TestCase):
             settings.INDEX, '{}-2'.format(settings.DOC_TYPE), id=test_id)
 
         self.assertTrue(result['_id'] == test_id)
+
+    @inlineCallbacks
+    def test_set_alias(self):
+        def side_effect(*args, **kwargs):
+            if args[0] == 'POST' and args[1] == '_aliases':
+                return {'acknowledged': True}
+            else:
+                return {'indices': {'test_index': {}}}
+
+        if use_mock():
+            self.es.connection = Mock()
+            self.es.connection.execute.side_effect = side_effect
+
+        result = yield self.es.set_alias('test_alias', settings.INDEX)
+        self.assertTrue(result['acknowledged'])
+
+    @inlineCallbacks
+    def test_refresh(self):
+        self._mock = {'_shards': {'successful': 10}}
+
+        result = yield self.es.refresh(settings.INDEX)
+        self.assertTrue('_shards' in result)
+        self.assertTrue(result['_shards']['successful'])
