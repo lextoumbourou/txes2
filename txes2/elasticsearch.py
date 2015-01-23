@@ -413,8 +413,8 @@ class ElasticSearch(object):
         """
         Retrieve the cluster state.
 
-        :param metric: a list of metrics for filtering results (see docs).
-        :param indices: a list of indicies for filtering results (see docs).
+        :param metric: a list of metrics for filtering results (see ES docs).
+        :param indices: a list of indicies for filtering results (see ES docs).
         """
         path = ['_cluster', 'state']
 
