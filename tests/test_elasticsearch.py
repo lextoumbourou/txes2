@@ -248,3 +248,28 @@ class ElasticSearchIntegrationTest(TestCase):
         result = yield self.es.refresh(settings.INDEX)
         self.assertTrue('_shards' in result)
         self.assertTrue(result['_shards']['successful'])
+
+    @inlineCallbacks
+    def test_cluster_state(self):
+        # Ensure metric filtering works
+        self._mock = {'cluster_name': 'test', 'blocks': {}}
+
+        result = yield self.es.cluster_state(metrics=['blocks'])
+        self.assertTrue('metadata' not in result)
+
+        self._mock = {
+            'cluster_name': 'test', 'blocks': {},
+            'routing_table': {'indices': {}}}
+
+        result = yield self.es.cluster_state(indices=[settings.INDEX])
+        self.assertTrue(
+            'main' not in result['routing_table']['indices'])
+
+        self._mock = {
+            'cluster_name': 'test', 'metadata': {},
+            'routing_table': {'indices': {'main': {}}}}
+
+        result = yield self.es.cluster_state()
+        self.assertTrue(
+            'metadata' in result and
+            'main' in result['routing_table']['indices'])

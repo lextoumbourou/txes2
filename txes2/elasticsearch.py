@@ -409,34 +409,29 @@ class ElasticSearch(object):
         d = self._send_request('GET', path, mapping)
         return d
 
-    def cluster_state(
-        self, filter_nodes=None, filter_routing_table=None,
-        filter_metadata=None, filter_blocks=None,
-        filter_indices=None
-    ):
-        """Retrieve the cluster state."""
-        path = self._make_path(['_cluster', 'state'])
-        params = {}
+    def cluster_state(self, metrics=None, indices=None, **kwargs):
+        """
+        Retrieve the cluster state.
 
-        if filter_nodes:
-            params['filter_nodes'] = filter_nodes
+        :param metric: a list of metrics for filtering results (see docs).
+        :param indices: a list of indicies for filtering results (see docs).
+        """
+        path = ['_cluster', 'state']
 
-        if filter_routing_table:
-            params['filter_routing_table'] = filter_routing_table
+        if metrics:
+            if not isinstance(metrics, basestring):
+                metrics = ','.join(metrics)
+            path.append(metrics)
+        else:
+            path.append('_all')
 
-        if filter_metadata:
-            params['filter_metadata'] = filter_metadata
+        if indices:
+            if not isinstance(indices, basestring):
+                indices = ','.join(indices)
+            path.append(indices)
 
-        if filter_blocks:
-            params['filter_blocks'] = filter_blocks
-
-        if filter_indices:
-            if isinstance(filter_indices, basestring):
-                params['filter_indices'] = filter_indices
-            else:
-                params['filter_indices'] = ','.join(filter_indices)
-
-        d = self._send_request('GET', path, params=params)
+        path = self._make_path(path)
+        d = self._send_request('GET', path, **kwargs)
         return d
 
     def cluster_nodes(self, nodes=None):
