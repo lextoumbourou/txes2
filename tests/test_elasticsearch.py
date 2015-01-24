@@ -273,3 +273,23 @@ class ElasticSearchIntegrationTest(TestCase):
         self.assertTrue(
             'metadata' in result and
             'main' in result['routing_table']['indices'])
+
+    @inlineCallbacks
+    def test_create_and_delete_river(self):
+        self._mock = {'_type': 'twitter', 'created': True}
+
+        river_data = {
+            'type': 'twitter',
+            'twitter': {'user': 'blah'},
+            'index': {
+                'index': 'twitter',
+            }
+        }
+
+        result = yield self.es.create_river(river_data)
+        self.assertTrue(result['_type'] == 'twitter')
+
+        self._mock = {'acknowledged': True}
+
+        result = yield self.es.delete_river(river_data)
+        self.assertTrue(result['acknowledged'])
