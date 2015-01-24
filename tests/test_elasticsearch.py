@@ -293,3 +293,11 @@ class ElasticSearchIntegrationTest(TestCase):
 
         result = yield self.es.delete_river(river_data)
         self.assertTrue(result['acknowledged'])
+
+    @inlineCallbacks
+    def test_put_mapping(self):
+        self._mock = {'acknowledged': True}
+
+        mapping = {'properties': {'name': {'type': 'string'}}}
+        result = yield self.es.put_mapping(settings.DOC_TYPE, mapping)
+        self.assertTrue(result['acknowledged'])
