@@ -41,7 +41,7 @@ Integration
 
 ::
 
-    vagrant up
+    vagrant up --provision
 
 2. Run integration tests.
 
