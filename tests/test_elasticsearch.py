@@ -301,3 +301,12 @@ class ElasticSearchIntegrationTest(TestCase):
         mapping = {'properties': {'name': {'type': 'string'}}}
         result = yield self.es.put_mapping(settings.DOC_TYPE, mapping)
         self.assertTrue(result['acknowledged'])
+
+    @inlineCallbacks
+    def test_flush(self):
+        self._mock = {'_shards': {'successful': 72, 'failed': 0, 'total': 72}}
+
+        result = yield self.es.flush(
+            settings.INDEX, wait_if_ongoing=True, force=True)
+        self.assertTrue('_shards' in result)
+        self.assertFalse(result['_shards']['failed'])

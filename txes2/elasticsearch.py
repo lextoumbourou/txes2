@@ -259,13 +259,19 @@ class ElasticSearch(object):
         d = self._send_request('POST', '/{}/_open'.format(index))
         return d
 
-    def flush(self, indexes=None, refresh=None):
+    def flush(self, indexes=None, wait_if_ongoing=None, full=None, force=None):
         def flush_it(result=None):
             indices = self._validate_indexes(indexes)
             path = self._make_path([','.join(indices), '_flush'])
-            params = None
-            if refresh:
-                params['refresh'] = True
+            params = {}
+
+            if wait_if_ongoing:
+                params['wait_if_ongoing'] = bool(wait_if_ongoing)
+            if full:
+                params['full'] = bool(full)
+            if force:
+                params['force'] = bool(force)
+
             d = self._send_request('POST', path, params=params)
             return d
 
