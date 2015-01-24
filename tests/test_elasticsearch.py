@@ -1,5 +1,6 @@
 """Tests for the ElasticSearch class."""
 
+import uuid
 import os
 from mock import Mock
 
@@ -36,6 +37,14 @@ class ElasticSearchIntegrationTest(TestCase):
                 yield self.es.create_index(settings.INDEX)
             except ElasticSearchException:
                 pass
+
+    @inlineCallbacks
+    def test_create_index(self):
+        self._mock = {'acknowledged': True}
+
+        index_name = uuid.uuid4()
+        result = yield self.es.create_index(index_name)
+        self.assertTrue(result['acknowledged'])
 
     def test_can_handle_basestring_input(self):
         tmp_es = ElasticSearch(
