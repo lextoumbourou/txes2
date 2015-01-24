@@ -341,13 +341,6 @@ class ElasticSearch(object):
         d = self._send_request('POST', path, body=body, params=analyzer)
         return d
 
-    def gateway_snapshot(self, indexes=None):
-        """Gateway snapshot one or more indices."""
-        indices = self._validate_indexes(indexes)
-        path = self._make_path([','.join(indices), '_gateway', 'snapshot'])
-        d = self._send_request('POST', path)
-        return d
-
     def put_mapping(self, doc_type, mapping, indexes=None):
         """Register mapping definition for a specific type."""
         indices = self._validate_indexes(indexes)
