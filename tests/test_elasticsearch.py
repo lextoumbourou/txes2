@@ -77,6 +77,11 @@ class ElasticSearchIntegrationTest(TestCase):
         result = yield self.es.mget([1], settings.INDEX, settings.DOC_TYPE)
         self.assertTrue('docs' in result)
 
+        result = yield self.es.mget(
+            [(settings.INDEX, settings.DOC_TYPE, 1),
+             (settings.INDEX, settings.DOC_TYPE, 1, ['name'])])
+        self.assertTrue('docs' in result)
+
     @inlineCallbacks
     def test_analyze(self):
         self._mock = {'tokens': [
