@@ -324,3 +324,18 @@ class ElasticSearchIntegrationTest(TestCase):
             settings.INDEX, wait_if_ongoing=True, force=True)
         self.assertTrue('_shards' in result)
         self.assertFalse(result['_shards']['failed'])
+
+    @inlineCallbacks
+    def test_update_settings(self):
+        self._mock = {'acknowledged': True}
+
+        data = {'index': {'refresh_interval': 10}}
+        result = yield self.es.update_settings(settings.INDEX, data)
+        self.assertTrue(result['acknowledged'])
+
+    @inlineCallbacks
+    def test_delete_mapping(self):
+        self._mock = {'acknowledged': True}
+        result = yield self.es.delete_mapping(
+            settings.INDEX, settings.DOC_TYPE)
+        self.assertTrue(result['acknowledged'])
