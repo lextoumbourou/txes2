@@ -339,3 +339,19 @@ class ElasticSearchIntegrationTest(TestCase):
         result = yield self.es.delete_mapping(
             settings.INDEX, settings.DOC_TYPE)
         self.assertTrue(result['acknowledged'])
+
+    @inlineCallbacks
+    def test_partial_update(self):
+        self._mock = {'_source': {'tags': ['tag1', 'tag2']}}
+
+        yield self.es.index(
+            doc_type=settings.DOC_TYPE, index=settings.INDEX, id=1,
+            doc={'name': 'Hello breh', 'tags': ['tag1']})
+
+        yield self.es.partial_update(
+            index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1,
+            script='ctx._source.tags+=new_tag', params={'new_tag': 'tag2'})
+
+        result = yield self.es.get(index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1)
+
+        self.assertTrue(result['_source']['tags'] == ['tag1', 'tag2'])
