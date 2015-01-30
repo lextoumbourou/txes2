@@ -444,8 +444,7 @@ class ElasticSearch(object):
 
     def index(
         self, doc, index, doc_type, id=None, parent=None,
-        force_insert=None, bulk=False, version=None,
-        querystring_args=None
+        force_insert=None, bulk=False, version=None, **query_params
     ):
         """Index a dict into an index."""
         self.refreshed = False
@@ -467,17 +466,14 @@ class ElasticSearch(object):
             self.bulk_data.append(data)
             return self.flush_bulk()
 
-        if not querystring_args:
-            querystring_args = {}
-
         if force_insert:
-            querystring_args['op_type'] = 'create'
+            query_params['op_type'] = 'create'
 
         if parent:
-            querystring_args['parent'] = parent
+            query_params['parent'] = parent
 
         if version:
-            querystring_args['version'] = version
+            query_params['version'] = version
 
         if id:
             request_method = 'PUT'
@@ -487,7 +483,7 @@ class ElasticSearch(object):
         path = self._make_path([index, doc_type, id])
         d = self._send_request(
             request_method, path, body=doc,
-            params=querystring_args)
+            params=query_params)
         return d
 
     def flush_bulk(self, forced=False):
@@ -506,7 +502,7 @@ class ElasticSearch(object):
         self.bulk_data = []
         return d
 
-    def delete(self, index, doc_type, id, bulk=False):
+    def delete(self, index, doc_type, id, bulk=False, **query_params):
         """Delete a document based on its id."""
         if bulk:
             cmd = {'delete': {'_index': index,
@@ -516,10 +512,10 @@ class ElasticSearch(object):
             return self.flush_bulk()
 
         path = self._make_path([index, doc_type, id])
-        d = self._send_request('DELETE', path)
+        d = self._send_request('DELETE', path, params=query_params)
         return d
 
-    def delete_by_query(self, indexes, doc_types, query, **params):
+    def delete_by_query(self, indexes, doc_types, query, **query_params):
         """Delete documents from one or more indexes/types from query."""
         indices = self._validate_indexes(indexes)
         if not doc_types:
@@ -530,7 +526,7 @@ class ElasticSearch(object):
         path = self._make_path(
             [','.join(indices), ','.join(doc_types), '_query'])
         body = {'query': query}
-        d = self._send_request('DELETE', path, body, params=params)
+        d = self._send_request('DELETE', path, body, params=query_params)
         return d
 
     def delete_mapping(self, index, doc_type):
@@ -539,14 +535,16 @@ class ElasticSearch(object):
         d = self._send_request('DELETE', path)
         return d
 
-    def get(self, index, doc_type, id, fields=None, routing=None, **params):
+    def get(
+        self, index, doc_type, id, fields=None, routing=None, **query_params
+    ):
         """Get a typed document from an index based on its id."""
         path = self._make_path([index, doc_type, id])
         if fields:
-            params['fields'] = ','.join(fields)
+            query_params['fields'] = ','.join(fields)
         if routing:
-            params['routings'] = routing
-        d = self._send_request('GET', path, params=params)
+            query_params['routings'] = routing
+        d = self._send_request('GET', path, params=query_params)
         return d
 
     def mget(self, ids, index=None, doc_type=None, **query_params):
