@@ -685,7 +685,7 @@ class ElasticSearch(object):
         else:
             cmd = {'doc': doc}
 
-        path = self._make_path(index, doc_type, id, '_update')
+        path = self._make_path([index, doc_type, id, '_update'])
         d = self._send_request('POST', path, cmd, params=query_params)
         return d
 
