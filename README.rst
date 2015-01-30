@@ -37,6 +37,11 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.2.1
+^^^^^
+
+- Added ``partial_update`` method.
+
 0.2.0
 ^^^^^
 
