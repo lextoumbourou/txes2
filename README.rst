@@ -37,6 +37,14 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.2.0
+^^^^^
+
+- Ensure ``query_params`` is used consistently across API.
+- Lots of test coverage.
+- Remove legacy methods.
+- Improved support for ES v1.x.
+
 0.1.8
 ^^^^^
 
