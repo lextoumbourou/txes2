@@ -471,7 +471,7 @@ class ElasticSearch(object):
             querystring_args = {}
 
         if force_insert:
-            querystring_args['opType'] = 'create'
+            querystring_args['op_type'] = 'create'
 
         if parent:
             querystring_args['parent'] = parent
