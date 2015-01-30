@@ -668,6 +668,27 @@ class ElasticSearch(object):
         d = self._send_request('PUT', path, body=settings)
         return d
 
+    def partial_update(
+        self, index, doc_type, id, doc=None, script=None,
+        params=None, upsert=None, **query_params
+    ):
+        """Partially update a document with a script."""
+        if doc is None and script is None:
+            raise exceptions.InvalidQuery("script or doc can not both be None")
+
+        if doc is None:
+            cmd = {'script': script}
+            if params:
+                cmd["params"] = params
+            if upsert:
+                cmd["upsert"] = params
+        else:
+            cmd = {'doc': doc}
+
+        path = self._make_path(index, doc_type, id, '_update')
+        d = self._send_request('POST', path, cmd, params=query_params)
+        return d
+
     @property
     def servers(self):
         """Return a list of servers available for connections."""
