@@ -352,6 +352,7 @@ class ElasticSearchIntegrationTest(TestCase):
             index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1,
             script='ctx._source.tags+=new_tag', params={'new_tag': 'tag2'})
 
-        result = yield self.es.get(index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1)
+        result = yield self.es.get(
+            index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1)
 
         self.assertTrue(result['_source']['tags'] == ['tag1', 'tag2'])
