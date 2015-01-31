@@ -681,7 +681,7 @@ class ElasticSearch(object):
             if params:
                 cmd["params"] = params
             if upsert:
-                cmd["upsert"] = params
+                cmd["upsert"] = upsert
         else:
             cmd = {'doc': doc}
 
