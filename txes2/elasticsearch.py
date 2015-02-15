@@ -16,13 +16,15 @@ class ElasticSearch(object):
         """
         :param servers: either a single ES server URL or list of servers.
         :param int timeout: connection timeout in seconds.
-        :param int bulk_size: bulk size (?).
+        :param int bulk_size: how much bulk data to accumulate before indexing
+                              (when indexing in bulk).
         :param int retry_time: frequency in seconds for retrying broken ES
                                nodes.
         :param bool discover: if True, will autodiscover ES nodes at
                               connection time.
-        :param bool discover_interval: time in seconds between node discovery,
-                                       set to False to skip.
+        :param bool discovery_interval: time in seconds between node discovery
+                                        after initial discovery, set to False
+                                        to skip.
         :param list default_indexes: list of indexes to use by default when
                                      querying ES.
         :param bool autorefresh: should we perform index autorefresh.
