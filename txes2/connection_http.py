@@ -44,7 +44,8 @@ class HTTPConnection(object):
 
     def close(self):
         """Close up all persistent connections."""
-        return self.pool.closeCachedConnections()
+        if self.pool:
+            return self.pool.closeCachedConnections()
 
     def execute(self, method, path, body=None, params=None):
         """Execute a query against a server."""
