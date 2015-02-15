@@ -492,7 +492,8 @@ class ElasticSearch(object):
         """Wait to process all pending operations."""
         if not forced and len(self.bulk_data) < self.bulk_size:
             return defer.succeed(None)
-        return self.forceBulk()
+
+        return self.force_bulk()
 
     def force_bulk(self):
         """Force executing of all bulk data."""
