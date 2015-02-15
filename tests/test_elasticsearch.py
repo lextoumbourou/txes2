@@ -275,9 +275,10 @@ class ElasticSearchIntegrationTest(TestCase):
             'cluster_name': 'test', 'blocks': {},
             'routing_table': {'indices': {}}}
 
-        result = yield self.es.cluster_state(indices=[settings.INDEX])
+        random_index_name = uuid.uuid4()
+        result = yield self.es.cluster_state(indices=[random_index_name.hex])
         self.assertTrue(
-            'main' not in result['routing_table']['indices'])
+            settings.INDEX not in result['routing_table']['indices'])
 
         self._mock = {
             'cluster_name': 'test', 'metadata': {},
@@ -286,7 +287,7 @@ class ElasticSearchIntegrationTest(TestCase):
         result = yield self.es.cluster_state()
         self.assertTrue(
             'metadata' in result and
-            'main' in result['routing_table']['indices'])
+            settings.INDEX in result['routing_table']['indices'])
 
     @inlineCallbacks
     def test_create_and_delete_river(self):
