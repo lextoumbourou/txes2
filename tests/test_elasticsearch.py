@@ -5,7 +5,7 @@ import os
 from mock import Mock
 
 from twisted.trial.unittest import TestCase
-from twisted.internet.defer import inlineCallbacks
+from twisted.internet.defer import inlineCallbacks, succeed
 
 from txes2.elasticsearch import ElasticSearch
 from txes2.exceptions import ElasticSearchException, NotFoundException
@@ -28,9 +28,9 @@ class ElasticSearchTest(TestCase):
     def setUp(self):
         self.es = ElasticSearch(
             settings.URL, discover=False,
-            discover_interval=False, persistent=False)
+            discovery_interval=False, persistent=False)
         if use_mock():
-            self.es.connection = Mock()
+            self.es.connection.execute = Mock()
             self.es.connection.execute = self._get_mock
         else:
             try:
@@ -382,3 +382,15 @@ class ElasticSearchTest(TestCase):
 
         self.assertFalse(result['errors'])
         self.assertTrue(len(result['items']) == 2)
+
+    @inlineCallbacks
+    def test_perform_discovery(self):
+        self.es.cluster_nodes = Mock()
+        self.es.cluster_nodes.return_value = succeed(
+            {'cluster_name': 'test',
+             'nodes': {
+                 'node-1': {'http_address': 'inet[/10.0.0.1:9200]'},
+                 'node-2': {'http_address': 'inet[/10.0.0.2:9200]'},
+             }})
+        yield self.es._perform_discovery()
+        self.assertTrue(len(self.es.connection.servers) == 4)
