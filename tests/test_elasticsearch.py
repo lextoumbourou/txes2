@@ -17,7 +17,7 @@ def use_mock():
     return os.getenv('USE_MOCKS')
 
 
-class ElasticSearchIntegrationTest(TestCase):
+class ElasticSearchTest(TestCase):
 
     """Tests for the ElasticSearch class."""
 
@@ -282,7 +282,7 @@ class ElasticSearchIntegrationTest(TestCase):
 
         self._mock = {
             'cluster_name': 'test', 'metadata': {},
-            'routing_table': {'indices': {'main': {}}}}
+            'routing_table': {'indices': {settings.INDEX: {}}}}
 
         result = yield self.es.cluster_state()
         self.assertTrue(
@@ -357,3 +357,28 @@ class ElasticSearchIntegrationTest(TestCase):
             index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1)
 
         self.assertTrue(result['_source']['tags'] == ['tag1', 'tag2'])
+
+    @inlineCallbacks
+    def test_index_bulk(self):
+        self._mock = {
+            'errors': False,
+            'items': [
+                {'create': {'_id': 'AUuM_KMFMQEOMq5Ak3hH'}},
+                {'create': {'_id': 'AUuM_KMFMQEOMq5Ak3hI'}}]
+        }
+
+        self.es.bulk_size = 2
+
+        doc = {'name': 'Hello 1'}
+        result = yield self.es.index(
+            doc=doc, doc_type=settings.DOC_TYPE,
+            index=settings.INDEX, bulk=True)
+        self.assertTrue(result is None)
+
+        doc = {'name': 'Hello 2'}
+        result = yield self.es.index(
+            doc=doc, doc_type=settings.DOC_TYPE,
+            index=settings.INDEX, bulk=True)
+
+        self.assertFalse(result['errors'])
+        self.assertTrue(len(result['items']) == 2)
