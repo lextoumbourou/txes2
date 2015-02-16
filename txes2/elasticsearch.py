@@ -236,7 +236,7 @@ class ElasticSearch(object):
         """Set and alias (possibly removing what it already points to)."""
         def eb(failure):
             failure.trap(exceptions.IndexMissingException)
-            return self.addAlias(alias, indices)
+            return self.add_alias(alias, indices)
 
         def factor(old_indices):
             commands = [['remove', i, alias] for i in old_indices]
