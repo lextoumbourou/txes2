@@ -37,6 +37,13 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.2.3
+^^^^^
+
+- Check for connection pool before attempting to close it.
+- Fixed incorrect method names.
+- Small documentation fixes.
+
 0.2.2
 ^^^^^
 
