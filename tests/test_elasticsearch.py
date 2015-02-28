@@ -403,3 +403,10 @@ class ElasticSearchTest(TestCase):
              }})
         yield self.es._perform_discovery()
         self.assertTrue(len(self.es.connection.servers) == 4)
+
+    @inlineCallbacks
+    def test_delete_index(self):
+        self._mock = {'acknowledged': True}
+
+        result = yield self.es.delete_index(settings.INDEX)
+        self.assertTrue(result['acknowledged'])
