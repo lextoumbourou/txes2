@@ -337,8 +337,17 @@ class ElasticSearchTest(TestCase):
     @inlineCallbacks
     def test_delete_mapping(self):
         self._mock = {'acknowledged': True}
+
+        yield self.es.index(
+            doc_type=settings.DOC_TYPE, index=settings.INDEX, id=1,
+            doc={'name': 'Hello breh'})
+        # Fixes the race condition that occurs when trying to
+        # delete doc that doesn't exist yet.
+        yield self.es.refresh(settings.INDEX)
+
         result = yield self.es.delete_mapping(
             settings.INDEX, settings.DOC_TYPE)
+
         self.assertTrue(result['acknowledged'])
 
     @inlineCallbacks
