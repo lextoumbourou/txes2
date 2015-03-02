@@ -157,42 +157,54 @@ class ElasticSearch(object):
 
     def get_indices(self, include_aliases=False):
         """
-        Get a dict holding an entry for each index which exists.
+        Retrieve a dict where each key is the index name and each value is
+        another dict containing the following properties:
 
-        If ``include_aliases`` is True, the dict will also contain entries for
-        aliases.
+         - num_docs: Number of documents in the index or alias.
+         - alias_for: Only present for an alias: holds a list of indices
+                      which this is an alias for. Requires the
+                      ``include_aliases`` param to be ``True``.
 
-        The key for each entry in the dict is the index or alias name. The
-        value is a dict holding the following properties:
+        Example:
 
-         - num_docs: Number of ducuments in the index or alias.
-         - alias_for: Only present for an alias: hols a list of indicis
-                      which this is an alias for.
+        ::
+
+        {u'website': {'num_docs': 10837},
+         u'website_alias': {
+             'alias_for': [u'website'],
+             'num_docs': 10837}}
         """
-        def factor(status):
+        def factor(_, status, state):
             result = {}
-            indices = status['indices']
-            for index in sorted(indices):
-                info = indices[index]
-                num_docs = info['docs']['num_docs']
+            indices_status = status['indices']
+            indices_metadata = state['metadata']['indices']
+
+            for index in sorted(indices_metadata.keys()):
+                info = indices_status[index]
+                num_docs = info['docs'].get('num_docs') or 0
                 result[index] = {'num_docs': num_docs}
-                if not include_aliases or 'aliases' not in info:
+
+                if not include_aliases:
                     continue
 
-                for alias in info['aliases']:
-                    if alias not in result:
-                        result[alias] = dict()
+                metadata = indices_metadata[index]
 
-                    alias_docs = result[alias].get('num_docs', 0) + num_docs
-                    result[alias]['num_docs'] = alias_docs
+                for alias in metadata.get('aliases', []):
+                    alias_obj = result.get(alias) or {}
+                    alias_obj['num_docs'] = (
+                        alias_obj.get('num_docs', 0) + num_docs)
+                    alias_obj.setdefault('alias_for', []).append(index)
+                    result[alias] = alias_obj
 
-                    if 'alias_for' not in result[alias]:
-                        result[alias]['alias_for'] = list()
-                    result[alias]['alias_for'].append(index)
             return result
 
-        d = self.status()
-        return d.addCallback(factor)
+        status = {}
+        state = {}
+
+        d1 = self.status().addCallback(lambda r: status.update(r))
+        d2 = self.cluster_state().addCallback(lambda r: state.update(r))
+
+        return defer.DeferredList([d1, d2]).addCallback(factor, status, state)
 
     def get_alias(self, alias):
         """
@@ -532,10 +544,10 @@ class ElasticSearch(object):
         d = self._send_request('DELETE', path, body, params=query_params)
         return d
 
-    def delete_mapping(self, index, doc_type):
+    def delete_mapping(self, index, doc_type, **query_params):
         """Delete a document type from a specific index."""
         path = self._make_path([index, doc_type])
-        d = self._send_request('DELETE', path)
+        d = self._send_request('DELETE', path, params=query_params)
         return d
 
     def get(

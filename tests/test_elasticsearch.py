@@ -126,9 +126,38 @@ class ElasticSearchTest(TestCase):
 
     @inlineCallbacks
     def test_get_indices(self):
-        self._mock = {'indices': {settings.INDEX: {'docs': {'num_docs': 1}}}}
+        self._mock = {}
 
+        if use_mock():
+            self.es.cluster_state = Mock()
+            self.es.cluster_state.side_effect = lambda: succeed({
+                'metadata': {'indices': {
+                    settings.INDEX: {
+                        'aliases': {'test_alias': {
+                            'docs': {'num_docs': 2}
+                        }},
+                        'docs': {'num_docs': 2},
+                    }
+                }}
+            })
+
+            self.es.status = Mock()
+            self.es.status.side_effect = lambda: succeed({
+                'indices': {settings.INDEX: {
+                    'docs': {'num_docs': 2}}}
+            })
+
+        yield self.es.add_alias('test_alias', settings.INDEX)
+        yield self.es.index(
+            {'name': 'Blah'}, doc_type=settings.DOC_TYPE, index=settings.INDEX,
+            refresh=True)
         result = yield self.es.get_indices(include_aliases=True)
+
+        self.assertTrue(result['test_alias']['num_docs'] > 0)
+        self.assertTrue(settings.INDEX in result['test_alias']['alias_for'])
+
+        result = yield self.es.get_indices(include_aliases=False)
+        self.assertTrue('test_alias' not in result)
         self.assertTrue(settings.INDEX in result)
 
     @inlineCallbacks
