@@ -670,11 +670,10 @@ class ElasticSearch(object):
         d = self._send_request('DELETE', '/_river/{}/'.format(river_name))
         return d
 
-    def more_like_this(self, index, doc_type, id, fields, **params):
+    def more_like_this(self, index, doc_type, id, **query_params):
         """Execute a "more like this" query against one or more fields."""
         path = self._make_path([index, doc_type, id, '_mlt'])
-        params['fields'] = ','.join(fields)
-        d = self._send_request('GET', path, params=params)
+        d = self._send_request('GET', path, body={}, params=query_params)
         return d
 
     def update_settings(self, index, settings):
