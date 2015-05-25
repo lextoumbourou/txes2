@@ -3,12 +3,14 @@ txes2
 
 A Twisted ElasticSearch client loosely based on PyES.
 
-|travis| |coveralls| |pypi| |docs|
+|travis| |coveralls| |code_issues| |pypi| |docs|
 
 .. |travis| image:: https://travis-ci.org/lextoumbourou/txes2.svg?branch=master
    :target: https://travis-ci.org/lextoumbourou/txes2
 .. |coveralls| image:: https://coveralls.io/repos/lextoumbourou/txes2/badge.png?branch=master
    :target: https://coveralls.io/r/lextoumbourou/txes2?branch=master
+.. |code_issues| image:: ttp://www.quantifiedcode.com/api/v1/project/407655c0058649998742e2bb654db68e/badge.svg
+   :target: http://www.quantifiedcode.com/app/project/407655c0058649998742e2bb654db68e
 .. |pypi| image:: https://pypip.in/version/txes2/badge.svg
    :target: https://pypi.python.org/pypi/txes2/
 .. |docs| image:: https://readthedocs.org/projects/txes2/badge/?version=latest
