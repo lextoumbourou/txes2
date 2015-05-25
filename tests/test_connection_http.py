@@ -26,7 +26,7 @@ class HTTPConnectionTest(TestCase):
 
         conn = HTTPConnection()
         conn.connect('s1', pool=Mock())
-        conn.addServer('s2')
+        conn.add_server('s2')
 
         yield conn.execute(
             'GET', 'index/doc/_search', body={'query': {'term': 'something'}})

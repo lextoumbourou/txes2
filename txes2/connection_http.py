@@ -1,10 +1,9 @@
 import urllib
 
-from zope import interface
 import treq
 import anyjson
 
-from . import exceptions, interfaces, utils
+from . import exceptions, utils
 
 
 def _prepare_url(server, path, params):
@@ -24,9 +23,7 @@ def _prepare_url(server, path, params):
 
 
 class HTTPConnection(object):
-    interface.implements(interfaces.IConnection)
-
-    def addServer(self, server):
+    def add_server(self, server):
         if server not in self.servers:
             self.servers.append(server)
 

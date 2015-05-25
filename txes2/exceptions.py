@@ -100,14 +100,14 @@ def raise_exceptions(status, result):
     error = result["error"]
     bits = error.split('[', 1)
     if len(bits) == 2:
-        excClass = globals().get(bits[0])
-        if excClass:
+        exc_class = globals().get(bits[0])
+        if exc_class:
             msg = bits[1].rstrip(']')
-            raise excClass(msg, status, result)
+            raise exc_class(msg, status, result)
 
-    for pattern, excClass in exception_patterns_trailing.iteritems():
+    for pattern, exc_class in exception_patterns_trailing.iteritems():
         if not error.endswith(pattern):
             continue
-        raise excClass(error, status, result)
+        raise exc_class(error, status, result)
 
     raise ElasticSearchException(error, status, result)

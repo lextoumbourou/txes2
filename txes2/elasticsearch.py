@@ -6,6 +6,12 @@ from twisted.internet import defer, reactor
 from . import connection, exceptions
 
 
+def make_path(components):
+    """Build a path from a list of components."""
+    return '/{}'.format(
+        '/'.join([quote(str(c), '') for c in components if c]))
+
+
 class ElasticSearch(object):
 
     """A PyES-like ElasticSearch client."""
@@ -58,10 +64,6 @@ class ElasticSearch(object):
         if discover:
             self._perform_discovery()
 
-    def _make_path(self, components):
-        """Build a path from a list of components."""
-        return '/' + '/'.join([quote(str(c), '') for c in components if c])
-
     def _perform_discovery(self):
         def cb(data):
             self.cluster_name = data['cluster_name']
@@ -71,7 +73,7 @@ class ElasticSearch(object):
                     continue
 
                 server = http_addr.strip('inet[/]')
-                self.connection.addServer(server)
+                self.connection.add_server(server)
 
             if self.discovery_interval:
                 reactor.callLater(
@@ -92,7 +94,7 @@ class ElasticSearch(object):
                 dt = []
             elif isinstance(dt, basestring):
                 dt = [dt]
-            path = self._make_path(
+            path = make_path(
                 [','.join(indices), ','.join(dt), query_type])
             d = self._send_request('GET', path, body=query, params=params)
             return d
@@ -118,7 +120,7 @@ class ElasticSearch(object):
     def status(self, indexes=None):
         """Retrieve the status of one or more indices."""
         indices = self._validate_indexes(indexes)
-        path = self._make_path([','.join(indices), '_status'])
+        path = make_path([','.join(indices), '_status'])
         d = self._send_request('GET', path)
         return d
 
@@ -253,7 +255,7 @@ class ElasticSearch(object):
         def factor(old_indices):
             commands = [['remove', i, alias] for i in old_indices]
             commands.extend([['add', i, alias] for i in indices])
-            if len(commands):
+            if commands:
                 return self.change_aliases(*commands)
 
         if isinstance(indices, basestring):
@@ -276,7 +278,7 @@ class ElasticSearch(object):
     def flush(self, indexes=None, wait_if_ongoing=None, full=None, force=None):
         def flush_it(result=None):
             indices = self._validate_indexes(indexes)
-            path = self._make_path([','.join(indices), '_flush'])
+            path = make_path([','.join(indices), '_flush'])
             params = {}
 
             if wait_if_ongoing:
@@ -311,7 +313,7 @@ class ElasticSearch(object):
 
         def refresh_it(result=None):
             indices = self._validate_indexes(indexes)
-            path = self._make_path([','.join(indices), '_refresh'])
+            path = make_path([','.join(indices), '_refresh'])
             d = self._send_request('POST', path)
             d.addCallback(delay)
             return d
@@ -334,7 +336,7 @@ class ElasticSearch(object):
             return results
 
         indices = self._validate_indexes(indexes)
-        path = self._make_path([','.join(indices), '_optimize'])
+        path = make_path([','.join(indices), '_optimize'])
         params = {'wait_for_merge': wait_for_merge,
                   'only_expunge_deletes': only_expunge_deletes,
                   'refesh': refresh,
@@ -351,14 +353,14 @@ class ElasticSearch(object):
             analyzer = {'analyzer': analyzer}
 
         body = {'text': text}
-        path = self._make_path([index, '_analyze'])
+        path = make_path([index, '_analyze'])
         d = self._send_request('POST', path, body=body, params=analyzer)
         return d
 
     def put_mapping(self, doc_type, mapping, indexes=None):
         """Register mapping definition for a specific type."""
         indices = self._validate_indexes(indexes)
-        path = self._make_path([','.join(indices), doc_type, '_mapping'])
+        path = make_path([','.join(indices), doc_type, '_mapping'])
         if doc_type not in mapping:
             mapping = {doc_type: mapping}
         self.refreshed = False
@@ -374,7 +376,7 @@ class ElasticSearch(object):
             path_items.append(doc_type)
 
         path_items.append('_mapping')
-        path = self._make_path(path_items)
+        path = make_path(path_items)
         d = self._send_request('GET', path)
         return d
 
@@ -398,9 +400,9 @@ class ElasticSearch(object):
         timeout=30
     ):
         """Check the current cluster health."""
-        path = self._make_path(['_cluster', 'health'])
+        path = make_path(['_cluster', 'health'])
         if level not in ('cluster', 'indices', 'shards'):
-            raise ValueError('Invalid level: %s' % level)
+            raise ValueError('Invalid level: {}'.format(level))
 
         mapping = {'level': level}
 
@@ -443,7 +445,7 @@ class ElasticSearch(object):
                 indices = ','.join(indices)
             path.append(indices)
 
-        path = self._make_path(path)
+        path = make_path(path)
         d = self._send_request('GET', path, **kwargs)
         return d
 
@@ -452,7 +454,7 @@ class ElasticSearch(object):
         parts = ['_nodes']
         if nodes:
             parts.append(','.join(nodes))
-        path = self._make_path(parts)
+        path = make_path(parts)
         d = self._send_request('GET', path)
         return d
 
@@ -494,7 +496,7 @@ class ElasticSearch(object):
         else:
             request_method = 'POST'
 
-        path = self._make_path([index, doc_type, id])
+        path = make_path([index, doc_type, id])
         d = self._send_request(
             request_method, path, body=doc,
             params=query_params)
@@ -526,7 +528,7 @@ class ElasticSearch(object):
             self.bulk_data.append(anyjson.serialize(cmd))
             return self.flush_bulk()
 
-        path = self._make_path([index, doc_type, id])
+        path = make_path([index, doc_type, id])
         d = self._send_request('DELETE', path, params=query_params)
         return d
 
@@ -538,7 +540,7 @@ class ElasticSearch(object):
         elif isinstance(doc_types, basestring):
             doc_types = [doc_types]
 
-        path = self._make_path(
+        path = make_path(
             [','.join(indices), ','.join(doc_types), '_query'])
         body = {'query': query}
         d = self._send_request('DELETE', path, body, params=query_params)
@@ -546,7 +548,7 @@ class ElasticSearch(object):
 
     def delete_mapping(self, index, doc_type, **query_params):
         """Delete a document type from a specific index."""
-        path = self._make_path([index, doc_type])
+        path = make_path([index, doc_type])
         d = self._send_request('DELETE', path, params=query_params)
         return d
 
@@ -554,7 +556,7 @@ class ElasticSearch(object):
         self, index, doc_type, id, fields=None, routing=None, **query_params
     ):
         """Get a typed document from an index based on its id."""
-        path = self._make_path([index, doc_type, id])
+        path = make_path([index, doc_type, id])
         if fields:
             query_params['fields'] = ','.join(fields)
         if routing:
@@ -672,13 +674,13 @@ class ElasticSearch(object):
 
     def more_like_this(self, index, doc_type, id, **query_params):
         """Execute a "more like this" query against one or more fields."""
-        path = self._make_path([index, doc_type, id, '_mlt'])
+        path = make_path([index, doc_type, id, '_mlt'])
         d = self._send_request('GET', path, body={}, params=query_params)
         return d
 
     def update_settings(self, index, settings):
         """Update settings of an index."""
-        path = self._make_path([index, '_settings'])
+        path = make_path([index, '_settings'])
         d = self._send_request('PUT', path, body=settings)
         return d
 
@@ -699,7 +701,7 @@ class ElasticSearch(object):
         else:
             cmd = {'doc': doc}
 
-        path = self._make_path([index, doc_type, id, '_update'])
+        path = make_path([index, doc_type, id, '_update'])
         d = self._send_request('POST', path, cmd, params=query_params)
         return d
 
