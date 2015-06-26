@@ -45,7 +45,7 @@ def example():
     ########################
     query = {'query': {'match': {'name': 'Travis'}}}
     scroller = yield es.scan(query, doc_type=doc_type, index=index,
-        scroll_timeout='1m')
+                             scroll_timeout='1m')
     while True:
         try:
             yield scroller.next()
