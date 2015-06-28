@@ -1,7 +1,50 @@
 import time
 import random
 
+from urllib import quote
+
 from . import exceptions
+
+
+def make_path(components):
+    """Build a path from a list of components."""
+    return '/{}'.format(
+        '/'.join([quote(str(c), '') for c in components if c]))
+
+
+class Scroller(object):
+
+    """Handle scrolling through scan and scroll API."""
+
+    def __init__(self, results, scroll_timeout, es):
+        self.results = results
+        self.scroll_timeout = scroll_timeout
+        self.es = es
+
+    @property
+    def scroll_id(self):
+        if self.results:
+            return str(self.results['_scroll_id'])
+
+    def next_page(self):
+        """Fetch next page from scroll API."""
+        d = self.es._send_request(
+            'GET', '_search/scroll', self.scroll_id,
+            params={'scroll': self.scroll_timeout})
+        d.addCallback(self._set_results)
+        return d
+
+    def _set_results(self, results):
+        if not len(results['hits']['hits']):
+            self.results = None
+        else:
+            self.results = results
+
+        return self.results
+
+    def next(self):
+        """Deprecated. Use next_page."""
+        return self.next_page()
 
 
 class ServerList(list):
