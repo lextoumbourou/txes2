@@ -39,6 +39,12 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.3.0
+^^^^^
+
+- Fixed ``scan`` method (thanks @bra-fsn) and deprecated old methods.
+- Various bug fixes and test coverage increases.
+
 0.2.3
 ^^^^^
 
