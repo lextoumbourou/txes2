@@ -31,16 +31,14 @@ def example():
     pprint(results)
 
     # Perform a scan
-    ########################
-    query = {'query': {'match': {'name': 'Travis'}}}
-    scroller = yield es.scan(query, doc_type=doc_type, index=index,
-                             scroll_timeout='1m')
-    while True:
-        try:
-            yield scroller.next()
-        except StopIteration:
-            break
+    query = {'query': {'match_all': {}}}
+    scroller = yield es.scan(
+        query, doc_type=doc_type, index=index, scroll_timeout='1m')
+
+    while scroller.results:
         pprint(scroller.results)
+        yield scroller.next_page()
+
 
 if __name__ == '__main__':
     df = example()

@@ -12,6 +12,41 @@ def make_path(components):
         '/'.join([quote(str(c), '') for c in components if c]))
 
 
+class Scroller(object):
+
+    """Handle scrolling through scan and scroll API."""
+
+    def __init__(self, results, scroll_timeout, es):
+        self.results = results
+        self.scroll_timeout = scroll_timeout
+        self.es = es
+
+    @property
+    def scroll_id(self):
+        if self.results:
+            return str(self.results['_scroll_id'])
+
+    def next_page(self):
+        """Fetch next page from scroll API."""
+        d = self.es._send_request(
+            'GET', '_search/scroll', self.scroll_id,
+            params={'scroll': self.scroll_timeout})
+        d.addCallback(self._set_results)
+        return d
+
+    def _set_results(self, results):
+        if not len(results['hits']['hits']):
+            self.results = None
+        else:
+            self.results = results
+
+        return self.results
+
+    def next(self):
+        """Deprecated. Use next_page."""
+        return self.next_page()
+
+
 class ElasticSearch(object):
 
     """A PyES-like ElasticSearch client."""
@@ -613,42 +648,11 @@ class ElasticSearch(object):
         self, query, indexes=None, doc_type=None,
         scroll_timeout='10m', **params
     ):
-        """
-        Return an iterator which will scan against one or more indices.
-
-        Each call to next() will yield a deferred that will contain the
-        next dataset.
-        """
-
-        class Scroller(object):
-            def __init__(self, results, es_parent):
-                self.results = results
-                self.es_parent = es_parent
-
-            def __iter__(self):
-                return self
-
-            def _set_results(self, results):
-                if not len(results['hits']['hits']):
-                    raise StopIteration
-                self.results = results
-                return results
-
-            def next(self):
-                scroll_id = str(self.results['_scroll_id'])
-                d = self.es_parent._send_request(
-                    'GET', '_search/scroll', scroll_id,
-                    {'scroll': scroll_timeout})
-                d.addCallback(self._set_results)
-                return d
-
-        def scroll(results):
-            return Scroller(results, self)
-
+        """Start a scan eventually returning a Scroller."""
         d = self.search(
             query=query, indexes=indexes, doc_type=doc_type,
             search_types='scan', scroll=scroll_timeout, **params)
-        d.addCallback(scroll)
+        d.addCallback(lambda results: Scroller(results, scroll_timeout, self))
         return d
 
     def count(self, query, indexes=None, doc_types=None, **params):

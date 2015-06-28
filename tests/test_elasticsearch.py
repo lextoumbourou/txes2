@@ -450,7 +450,19 @@ class ElasticSearchTest(TestCase):
 
         query = {'query': {'term': {'name': 'blah'}}}
         scroller = yield self.es.scan(query, settings.INDEX, settings.DOC_TYPE)
-        self.assertTrue('_scroll_id' in scroller.results)
+
+        self.assertTrue(scroller.scroll_id == '1234')
+
+        self._mock = {'hits': {'hits': [{'result': 1}]}, '_scroll_id': '2345'}
+        yield scroller.next_page()
+
+        self.assertTrue(scroller.scroll_id == '2345')
+        self.assertEquals(scroller.results, self._mock)
+
+        self._mock = {'hits': {'hits': []}, '_scroll_id': '2345'}
+        yield scroller.next_page()
+
+        self.assertTrue(scroller.results is None)
 
     @inlineCallbacks
     def test_set_alias(self):
