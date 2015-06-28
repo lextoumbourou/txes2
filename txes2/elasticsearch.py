@@ -640,7 +640,7 @@ class ElasticSearch(object):
                     'GET', '_search/scroll', scroll_id,
                     {'scroll': scroll_timeout})
                 d.addCallback(self._set_results)
-                return
+                return d
 
         def scroll(results):
             return Scroller(results, self)
