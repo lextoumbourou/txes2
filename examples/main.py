@@ -40,6 +40,18 @@ def example():
     results = yield es.search(query, doc_type=doc_type, index=index)
     pprint(results)
 
+    ########################
+    # Perform a scan
+    ########################
+    query = {'query': {'match': {'name': 'Travis'}}}
+    scroller = yield es.scan(query, doc_type=doc_type, index=index,
+                             scroll_timeout='1m')
+    while True:
+        try:
+            yield scroller.next()
+        except StopIteration:
+            break
+        pprint(scroller.results)
 
 if __name__ == '__main__':
     df = example()
