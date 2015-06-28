@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='txes2',
-    version='0.2.3',
+    version='0.3.0',
     description="An Elasticsearch client for Twisted",
     keywords='twisted elasticsearch',
     author='Lex Toumbourou',
