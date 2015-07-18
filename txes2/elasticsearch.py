@@ -652,19 +652,27 @@ class ElasticSearch(object):
         self, index, doc_type, id, doc=None, script=None, script_file=None,
         params=None, upsert=None, **query_params
     ):
-        """Partially update a document with a script."""
+        """
+        Partially update a document with a script.
+
+        If ``script`` is passed in, ``script_file`` is ignored. For ``script_file``
+        to work, ES >= 1.4.5 is required as per:
+        https://github.com/elastic/elasticsearch/issues/10007
+        """
         if doc is None and script is None and script_file is None:
-            raise exceptions.InvalidQuery("script or doc can not both be None")
+            raise exceptions.InvalidQuery(
+                'script, script_file or doc cannot all be None')
 
         if doc is None:
             if script:
                 cmd = {'script': script}
             elif script_file:
                 cmd = {'script_file': script_file}
+
             if params:
-                cmd["params"] = params
+                cmd['params'] = params
             if upsert:
-                cmd["upsert"] = upsert
+                cmd['upsert'] = upsert
         else:
             cmd = {'doc': doc}
 
