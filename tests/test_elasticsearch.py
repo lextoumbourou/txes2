@@ -10,7 +10,7 @@ from twisted.internet.defer import inlineCallbacks, succeed, fail
 from txes2.elasticsearch import ElasticSearch
 from txes2.exceptions import ElasticSearchException, NotFoundException
 from txes2.exceptions import IndexAlreadyExistsException
-from txes2.exceptions import IndexMissingException
+from txes2.exceptions import IndexMissingException, InvalidQuery
 
 from . import settings
 
@@ -400,7 +400,28 @@ class ElasticSearchTest(TestCase):
         result = yield self.es.get(
             index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1)
 
-        self.assertTrue(result['_source']['tags'] == ['tag1', 'tag2'])
+        yield self.es.partial_update(
+            index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1,
+            script_file='new-tag', params={'new_tag': 'tag3'})
+
+        self._mock = {'_source': {'tags': ['tag1', 'tag2', 'tag3']}}
+        result = yield self.es.get(
+            index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1)
+
+        self.assertTrue(result['_source']['tags'] == ['tag1', 'tag2', 'tag3'])
+
+    @inlineCallbacks
+    def test_partial_update_failure_cases(self):
+        self._mock = {'_source': {'tags': ['tag1', 'tag2']}}
+
+        yield self.es.index(
+            doc_type=settings.DOC_TYPE, index=settings.INDEX, id=1,
+            doc={'name': 'Hello breh', 'tags': ['tag1']})
+
+        self.assertRaises(
+            InvalidQuery, self.es.partial_update,
+            index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1,
+            script=None, doc=None)
 
     @inlineCallbacks
     def test_path_is_encoded_properly(self):

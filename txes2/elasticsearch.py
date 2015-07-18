@@ -655,8 +655,8 @@ class ElasticSearch(object):
         """
         Partially update a document with a script.
 
-        If ``script`` is passed in, ``script_file`` is ignored. For ``script_file``
-        to work, ES >= 1.4.5 is required as per:
+        If ``script`` is passed in, ``script_file`` is ignored.
+        For ``script_file`` to work, ES >= 1.4.5 is required as per:
         https://github.com/elastic/elasticsearch/issues/10007
         """
         if doc is None and script is None and script_file is None:
