@@ -649,15 +649,18 @@ class ElasticSearch(object):
         return d
 
     def partial_update(
-        self, index, doc_type, id, doc=None, script=None,
+        self, index, doc_type, id, doc=None, script=None, script_file=None,
         params=None, upsert=None, **query_params
     ):
         """Partially update a document with a script."""
-        if doc is None and script is None:
+        if doc is None and script is None and script_file is None:
             raise exceptions.InvalidQuery("script or doc can not both be None")
 
         if doc is None:
-            cmd = {'script': script}
+            if script:
+                cmd = {'script': script}
+            elif script_file:
+                cmd = {'script_file': script_file}
             if params:
                 cmd["params"] = params
             if upsert:
