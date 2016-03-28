@@ -63,9 +63,15 @@ class ElasticSearch(object):
         def cb(data):
             self.cluster_name = data['cluster_name']
             for node in data['nodes']:
-                http_addr = data['nodes'][node].get('http_address')
+                data_node = data['nodes'][node]
+                http_addr = data_node.get('http_address')
                 if not http_addr:
                     continue
+                # Ignore master nodes
+                if (data_node.get('data', 'true') == 'false' and
+                    data_node.get('client', 'false') == 'false' and
+                    data_node.get('master', 'true') == 'true'):
+                        continue
 
                 server = http_addr.strip('inet[/]')
                 self.connection.add_server(server)
