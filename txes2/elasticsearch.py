@@ -70,7 +70,7 @@ class ElasticSearch(object):
                 # Ignore master nodes
                 if (data_node.get('data', 'true') == 'false' and
                     data_node.get('client', 'false') == 'false' and
-                    data_node.get('master', 'true') == 'true'):
+                        data_node.get('master', 'true') == 'true'):
                         continue
 
                 server = http_addr.strip('inet[/]')

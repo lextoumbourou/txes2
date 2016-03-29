@@ -459,9 +459,12 @@ class ElasticSearchTest(TestCase):
             {'cluster_name': 'test',
              'nodes': {
                  'node-1': {'http_address': 'inet[/10.0.0.1:9200]'},
-                 'node-2': {'http_address': 'inet[/10.0.0.2:9200]', 'data': 'true', 'master': 'false'},
-                 'master-1': {'http_address': 'inet[/10.0.0.3:9200]', 'data': 'false', 'master': 'true'},
-                 'master-2': {'http_address': 'inet[/10.0.0.4:9200]', 'data': 'false', 'master': 'true'},
+                 'node-2': {'http_address': 'inet[/10.0.0.2:9200]',
+                            'data': 'true', 'master': 'false'},
+                 'master-1': {'http_address': 'inet[/10.0.0.3:9200]',
+                              'data': 'false', 'master': 'true'},
+                 'master-2': {'http_address': 'inet[/10.0.0.4:9200]',
+                              'data': 'false', 'master': 'true'},
              }})
         yield self.es._perform_discovery()
         self.assertTrue(len(self.es.connection.servers) == 2)
