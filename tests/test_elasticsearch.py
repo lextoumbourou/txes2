@@ -1,7 +1,6 @@
 """Tests for the ElasticSearch class."""
 
 import uuid
-from txes2 import utils
 import os
 from mock import Mock
 
@@ -459,9 +458,11 @@ class ElasticSearchTest(TestCase):
                  'node-1': {'http_address': 'inet[/10.0.0.1:9200]'},
                  'node-2': {'http_address': 'inet[/10.0.0.2:9200]'},
                  'master-1': {'http_address': 'inet[/10.0.0.3:9200]',
-                              'attributes': {'data': 'false', 'master': 'true'}},
+                              'attributes':
+                                  {'data': 'false', 'master': 'true'}},
                  'master-2': {'http_address': 'inet[/10.0.0.4:9200]',
-                              'attributes': {'data': 'false', 'master': 'true'}},
+                              'attributes':
+                                  {'data': 'false', 'master': 'true'}},
              }})
         yield self.es._perform_discovery()
         self.assertTrue(len(self.es.connection.servers) == 4)
