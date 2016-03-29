@@ -68,9 +68,10 @@ class ElasticSearch(object):
                 if not http_addr:
                     continue
                 # Ignore master nodes
-                if (data_node.get('data', 'true') == 'false' and
-                    data_node.get('client', 'false') == 'false' and
-                        data_node.get('master', 'true') == 'true'):
+                attrs = data_node.get('attributes', {})
+                if (attrs.get('data', 'true') == 'false' and
+                    attrs.get('client', 'false') == 'false' and
+                        attrs.get('master', 'true') == 'true'):
                         continue
 
                 server = http_addr.strip('inet[/]')

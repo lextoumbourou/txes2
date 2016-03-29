@@ -440,7 +440,6 @@ class ElasticSearchTest(TestCase):
 
     @inlineCallbacks
     def test_perform_discovery(self):
-        self.es.connection.servers = utils.ServerList([])
         self.es.cluster_nodes = Mock()
         self.es.cluster_nodes.return_value = succeed(
             {'cluster_name': 'test',
@@ -449,25 +448,23 @@ class ElasticSearchTest(TestCase):
                  'node-2': {'http_address': 'inet[/10.0.0.2:9200]'},
              }})
         yield self.es._perform_discovery()
-        self.assertTrue(len(self.es.connection.servers) == 2)
+        self.assertTrue(len(self.es.connection.servers) == 4)
 
     @inlineCallbacks
     def test_perform_discovery_with_master_only_nodes(self):
-        self.es.connection.servers = utils.ServerList([])
         self.es.cluster_nodes = Mock()
         self.es.cluster_nodes.return_value = succeed(
             {'cluster_name': 'test',
              'nodes': {
                  'node-1': {'http_address': 'inet[/10.0.0.1:9200]'},
-                 'node-2': {'http_address': 'inet[/10.0.0.2:9200]',
-                            'data': 'true', 'master': 'false'},
+                 'node-2': {'http_address': 'inet[/10.0.0.2:9200]'},
                  'master-1': {'http_address': 'inet[/10.0.0.3:9200]',
-                              'data': 'false', 'master': 'true'},
+                              'attributes': {'data': 'false', 'master': 'true'}},
                  'master-2': {'http_address': 'inet[/10.0.0.4:9200]',
-                              'data': 'false', 'master': 'true'},
+                              'attributes': {'data': 'false', 'master': 'true'}},
              }})
         yield self.es._perform_discovery()
-        self.assertTrue(len(self.es.connection.servers) == 2)
+        self.assertTrue(len(self.es.connection.servers) == 4)
 
     @inlineCallbacks
     def test_put_mapping(self):
