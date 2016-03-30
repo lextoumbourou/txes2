@@ -450,6 +450,24 @@ class ElasticSearchTest(TestCase):
         self.assertTrue(len(self.es.connection.servers) == 4)
 
     @inlineCallbacks
+    def test_perform_discovery_with_master_only_nodes(self):
+        self.es.cluster_nodes = Mock()
+        self.es.cluster_nodes.return_value = succeed(
+            {'cluster_name': 'test',
+             'nodes': {
+                 'node-1': {'http_address': 'inet[/10.0.0.1:9200]'},
+                 'node-2': {'http_address': 'inet[/10.0.0.2:9200]'},
+                 'master-1': {'http_address': 'inet[/10.0.0.3:9200]',
+                              'attributes':
+                                  {'data': 'false', 'master': 'true'}},
+                 'master-2': {'http_address': 'inet[/10.0.0.4:9200]',
+                              'attributes':
+                                  {'data': 'false', 'master': 'true'}},
+             }})
+        yield self.es._perform_discovery()
+        self.assertTrue(len(self.es.connection.servers) == 4)
+
+    @inlineCallbacks
     def test_put_mapping(self):
         self._mock = {'acknowledged': True}
 
