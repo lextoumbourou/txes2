@@ -39,6 +39,12 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.4.0
+^^^^^
+
+- Add support for ``script_file`` arg in ``partial_update`` (thanks @bra-fsn). 
+- Ensure master-only nodes aren't included during Discovery (thanks @zsiddique).
+
 0.3.0
 ^^^^^
 
