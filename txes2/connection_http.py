@@ -1,5 +1,7 @@
 import urllib
 
+from twisted.internet import defer
+from twisted.internet.error import TCPTimedOutError, ConnectionRefusedError
 import treq
 import anyjson
 
@@ -39,32 +41,37 @@ class HTTPConnection(object):
         self.persistent = kwargs.get('persistent', True)
         self.pool = kwargs.get('pool')
         self.http_auth = kwargs.get('http_auth')
+        self.max_retries = kwargs.get('max_retries', 3)
 
     def close(self):
         """Close up all persistent connections."""
         if self.pool:
             return self.pool.closeCachedConnections()
 
+    @defer.inlineCallbacks
     def execute(self, method, path, body=None, params=None):
         """Execute a query against a server."""
-        server = self.servers.get()
-        timeout = self.servers.timeout
-
-        url = _prepare_url(server, path, params)
-
         if not isinstance(body, basestring):
             body = anyjson.serialize(body)
 
-        def request_done(response):
-            def _raise_error(body):
-                exceptions.raise_exceptions(response.code, body)
-                return body
+        for attempt in range(1, self.max_retries + 1):
+            server = self.servers.get()
+            timeout = self.servers.timeout
+            url = _prepare_url(server, path, params)
 
-            return treq.json_content(response.original).addCallback(
-                _raise_error)
-
-        d = treq.request(
-            method, url, data=body, pool=self.pool, auth=self.http_auth,
-            persistent=self.persistent, timeout=timeout)
-        d.addCallback(request_done)
-        return d
+            try:
+                response = yield treq.request(
+                    method, url, data=body, pool=self.pool,
+                    auth=self.http_auth, persistent=self.persistent,
+                    timeout=timeout)
+            except (ConnectionRefusedError, TCPTimedOutError) as e:
+                self.servers.mark_dead(server)
+                if attempt == self.max_retries:
+                    raise
+                continue
+            except Exception:
+                raise
+            else:
+                json = yield treq.json_content(response.original)
+                exceptions.raise_exceptions(response.code, json)
+                defer.returnValue(json)
