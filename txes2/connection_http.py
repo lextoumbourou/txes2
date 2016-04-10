@@ -38,6 +38,7 @@ class HTTPConnection(object):
 
         self.persistent = kwargs.get('persistent', True)
         self.pool = kwargs.get('pool')
+        self.http_auth = kwargs.get('http_auth')
 
     def close(self):
         """Close up all persistent connections."""
@@ -63,7 +64,7 @@ class HTTPConnection(object):
                 _raise_error)
 
         d = treq.request(
-            method, url, data=body, pool=self.pool,
+            method, url, data=body, pool=self.pool, auth=self.http_auth,
             persistent=self.persistent, timeout=timeout)
         d.addCallback(request_done)
         return d
