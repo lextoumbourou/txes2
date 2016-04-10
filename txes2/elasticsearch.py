@@ -16,6 +16,8 @@ class ElasticSearch(object):
                  default_indexes=None, autorefresh=False, *args, **kwargs):
         """
         :param servers: either a single ES server URL or list of servers.
+                        If you don't provide a scheme (eg `https://`) then the
+                        request will use HTTP by default.
         :param int timeout: connection timeout in seconds.
         :param int bulk_size: how much bulk data to accumulate before indexing
                               (when indexing in bulk).

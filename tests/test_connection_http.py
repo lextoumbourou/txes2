@@ -16,6 +16,11 @@ class HTTPConnectionTest(TestCase):
         result = _prepare_url('s1', 'index/doc/_search', {'size': 5})
         self.assertTrue(result == 'http://s1/index/doc/_search?size=5')
 
+    def test_prepare_url_handles_ssl(self):
+        result = _prepare_url(
+            'https://s1:443', 'index/doc/_search', {'size': 5})
+        self.assertTrue(result == 'https://s1:443/index/doc/_search?size=5')
+
     @patch('txes2.connection_http.treq')
     @inlineCallbacks
     def test_execute(self, treq_mock):

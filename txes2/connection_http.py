@@ -16,7 +16,7 @@ def _prepare_url(server, path, params):
     if params:
         url = url + '?' + urllib.urlencode(params)
 
-    if not url.startswith("http://"):
+    if not url.startswith(('http:', 'https:')):
         url = "http://" + url
 
     return url.encode('utf-8')
