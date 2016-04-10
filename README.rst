@@ -39,6 +39,12 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.5.0
+^^^^^
+
+- Add support for HTTP auth (for people using Shield or Nginx in front of ES).
+- Add support for HTTPS.
+
 0.4.0
 ^^^^^
 
