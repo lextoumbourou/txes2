@@ -30,7 +30,7 @@ class ElasticSearch(object):
                                      querying ES.
         :param bool autorefresh: should we perform index autorefresh.
         :param bool persistent: use persistent connection.
-        :param type http_auth: optional http auth tuple in the form
+        :param tuple http_auth: optional http auth tuple in the form
                                `('username', 'password')`.
         :param HTTPConnectionPool pool: optionally pass in HTTPConnectionPool
                                         instance to use for connection pool.
