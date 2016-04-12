@@ -1,7 +1,9 @@
 import urllib
 
 from twisted.internet import defer
-from twisted.internet.error import TCPTimedOutError, ConnectionRefusedError
+from twisted.internet.error import ConnectionRefusedError
+from twisted.web._newclient import (
+    ResponseNeverReceived, RequestTransmissionFailed, RequestNotSent)
 import treq
 import anyjson
 
@@ -64,14 +66,17 @@ class HTTPConnection(object):
                     method, url, data=body, pool=self.pool,
                     auth=self.http_auth, persistent=self.persistent,
                     timeout=timeout)
-            except (ConnectionRefusedError, TCPTimedOutError) as e:
+            except (
+                ConnectionRefusedError,
+                ResponseNeverReceived,
+                RequestTransmissionFailed,
+                RequestNotSent
+            ):
                 self.servers.mark_dead(server)
                 if attempt == self.max_retries:
                     raise
                 continue
-            except Exception:
-                raise
-            else:
-                json = yield treq.json_content(response.original)
-                exceptions.raise_exceptions(response.code, json)
-                defer.returnValue(json)
+
+            json = yield treq.json_content(response.original)
+            exceptions.raise_exceptions(response.code, json)
+            defer.returnValue(json)
