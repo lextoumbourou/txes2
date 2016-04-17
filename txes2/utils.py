@@ -67,5 +67,6 @@ class ServerList(list):
         return random.choice(self)
 
     def mark_dead(self, server):
-        self.remove(server)
-        self.dead.insert(0, (time.time() + self.retry_time, server))
+        if server in self:
+            self.remove(server)
+            self.dead.insert(0, (time.time() + self.retry_time, server))
