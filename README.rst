@@ -39,6 +39,11 @@ BSD (as per original project).
 Changelog
 ---------
 
+0.6.0 (Unreleased)
+^^^^^
+
+* Perform retries and ensure bad nodes are taken out of the pool.
+
 0.5.0
 ^^^^^
 
