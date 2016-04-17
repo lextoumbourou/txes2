@@ -84,7 +84,7 @@ class HTTPConnectionTest(TestCase):
             self.conn.execute('GET', 'index/doc/_search'),
             ElasticSearchException)
 
-        # Ensure we retry enough times
+        # Ensure no retries
         self.assertEquals(self.conn.servers.mark_dead.call_count, 0)
 
         self.conn.close()
