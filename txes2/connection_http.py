@@ -1,9 +1,8 @@
 import urllib
 
 from twisted.internet import defer
-from twisted.internet.error import ConnectionRefusedError
-from twisted.web._newclient import (
-    ResponseNeverReceived, RequestTransmissionFailed, RequestNotSent)
+from twisted.internet.error import ConnectError
+from twisted.web.client import ResponseFailed, RequestTransmissionFailed
 import treq
 import anyjson
 
@@ -61,22 +60,33 @@ class HTTPConnection(object):
             timeout = self.servers.timeout
             url = _prepare_url(server, path, params)
 
+            response = None  # Stop UnboundLocalError on uncaught exception
             try:
                 response = yield treq.request(
                     method, url, data=body, pool=self.pool,
                     auth=self.http_auth, persistent=self.persistent,
                     timeout=timeout)
-            except (
-                ConnectionRefusedError,
-                ResponseNeverReceived,
-                RequestTransmissionFailed,
-                RequestNotSent
-            ):
-                self.servers.mark_dead(server)
-                if attempt == self.max_retries:
-                    raise
-                continue
+                json = yield treq.json_content(response.original)
+                exceptions.raise_exceptions(response.code, json)
+            except Exception as e:
+                retry = False
 
-            json = yield treq.json_content(response.original)
-            exceptions.raise_exceptions(response.code, json)
-            defer.returnValue(json)
+                if isinstance(
+                    e, (
+                        ConnectError,
+                        ResponseFailed,
+                        RequestTransmissionFailed,
+                    )
+                ) or response and response.code in (503, 504):
+                    retry = True
+
+                if retry:
+                    self.servers.mark_dead(server)
+                    if attempt == self.max_retries:
+                        raise
+
+                    continue
+                else:
+                    raise
+            else:
+                defer.returnValue(json)
