@@ -66,8 +66,8 @@ class HTTPConnection(object):
                     method, url, data=body, pool=self.pool,
                     auth=self.http_auth, persistent=self.persistent,
                     timeout=timeout)
-                json = yield treq.json_content(response.original)
-                exceptions.raise_exceptions(response.code, json)
+                json_data = yield response.json()
+                exceptions.raise_exceptions(response.code, json_data)
             except Exception as e:
                 retry = False
 
@@ -89,4 +89,4 @@ class HTTPConnection(object):
                 else:
                     raise
             else:
-                defer.returnValue(json)
+                defer.returnValue(json_data)

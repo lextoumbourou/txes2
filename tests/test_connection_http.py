@@ -33,14 +33,14 @@ class HTTPConnectionTest(TestCase):
     @inlineCallbacks
     def test_execute(self, treq_mock):
         response_mock = Mock(code=200)
+        response_mock.json.return_value = succeed({'_id': 123})
 
         treq_mock.request.return_value = succeed(response_mock)
-        treq_mock.json_content.return_value = succeed({'_id': 123})
 
         yield self.conn.execute(
             'GET', 'index/doc/_search', body={'query': {'term': 'something'}})
 
-        assert treq_mock.json_content.called
+        assert response_mock.json.called
 
         self.conn.close()
 
@@ -72,11 +72,11 @@ class HTTPConnectionTest(TestCase):
     def test_execute_doesnt_retry_on_client_error(self, treq_mock):
         """When ES returns a client-exception, we shouldn't retry."""
         response_mock = Mock(code=429)
-
-        treq_mock.request.return_value = succeed(response_mock)
-        treq_mock.json_content.return_value = succeed({
+        response_mock.json.return_value = succeed({
             u'status': 429,
             u'error': u'ReduceSearchPhaseException[Failed to execute phase [fetch], [reduce] ; shardFailures {[2A-6X8MDRP-gZ6M_752d-A][tmp][0]: EsRejectedExecutionException[rejected execution (queue capacity 0) on org.elasticsearch.search.action.SearchServiceTransportAction$23@24084605]}]; nested: EsRejectedExecutionException[rejected execution (queue capacity 0) on org.elasticsearch.action.search.type.TransportSearchQueryThenFetchAction$AsyncAction$2@42658745]'})   # noqa
+
+        treq_mock.request.return_value = succeed(response_mock)
 
         self.conn.servers.mark_dead = Mock()
 
