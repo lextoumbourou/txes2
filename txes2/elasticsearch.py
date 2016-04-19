@@ -578,10 +578,23 @@ class ElasticSearch(object):
         self, query, indexes=None, doc_type=None,
         scroll_timeout='10m', **params
     ):
-        """Start a scan eventually returning a Scroller."""
+        """Start a scroll with _doc order, eventually returning a Scroller."""
+        if query:
+            query['sort']=['_doc']
         d = self.search(
             query=query, indexes=indexes, doc_type=doc_type,
-            search_types='scan', scroll=scroll_timeout, **params)
+            search_types='scroll', scroll=scroll_timeout, **params)
+        d.addCallback(lambda results: Scroller(results, scroll_timeout, self))
+        return d
+
+    def scroll(
+        self, query, indexes=None, doc_type=None,
+        scroll_timeout='10m', **params
+    ):
+        """Start a scroll eventually returning a Scroller."""
+        d = self.search(
+            query=query, indexes=indexes, doc_type=doc_type,
+            search_types='scroll', scroll=scroll_timeout, **params)
         d.addCallback(lambda results: Scroller(results, scroll_timeout, self))
         return d
 
