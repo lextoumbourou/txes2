@@ -74,6 +74,12 @@ class ClusterBlockException(ElasticSearchException):
 class MapperParsingException(ElasticSearchException):
     pass
 
+class ConflictError(ElasticSearchException):
+    pass
+
+exception_types = {
+                   'version_conflict_engine_exception': ConflictError
+                   }
 
 exception_patterns_trailing = {
     '] missing': NotFoundException,
@@ -98,16 +104,20 @@ def raise_exceptions(status, result):
                                      status, result)
 
     error = result["error"]
-    bits = error.split('[', 1)
-    if len(bits) == 2:
-        exc_class = globals().get(bits[0])
-        if exc_class:
-            msg = bits[1].rstrip(']')
-            raise exc_class(msg, status, result)
-
-    for pattern, exc_class in exception_patterns_trailing.iteritems():
-        if not error.endswith(pattern):
-            continue
-        raise exc_class(error, status, result)
+    if isinstance(error, str):
+        bits = error.split('[', 1)
+        if len(bits) == 2:
+            exc_class = globals().get(bits[0])
+            if exc_class:
+                msg = bits[1].rstrip(']')
+                raise exc_class(msg, status, result)
+    
+        for pattern, exc_class in exception_patterns_trailing.iteritems():
+            if not error.endswith(pattern):
+                continue
+            raise exc_class(error, status, result)
+    elif isinstance(error, dict):
+        if error.has_key('type') and exception_types.has_key(error['type']):
+            raise exception_types[error['type']](error, status, result)
 
     raise ElasticSearchException(error, status, result)
