@@ -55,7 +55,7 @@ class HTTPConnection(object):
         if not isinstance(body, basestring):
             body = anyjson.serialize(body)
 
-        for attempt in range(1, self.max_retries + 1):
+        for attempt in range(self.max_retries + 1):
             server = self.servers.get()
             timeout = self.servers.timeout
             url = _prepare_url(server, path, params)
