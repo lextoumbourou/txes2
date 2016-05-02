@@ -126,7 +126,7 @@ class ElasticSearch(object):
     def status(self, indexes=None):
         """Retrieve the status of one or more indices."""
         indices = self._validate_indexes(indexes)
-        path = make_path([','.join(indices), '_status'])
+        path = make_path([','.join(indices), '_stats'])
         d = self._send_request('GET', path)
         return d
 
