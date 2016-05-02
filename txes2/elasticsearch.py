@@ -632,21 +632,6 @@ class ElasticSearch(object):
         d = self._send_query('_count', query, indices, doc_types, **params)
         return d
 
-    def create_river(self, river, river_name=None):
-        """Create a river."""
-        if not river_name:
-            river_name = river['index']['index']
-        d = self._send_request(
-            'PUT', '/_river/{}/_meta'.format(river_name), body=river)
-        return d
-
-    def delete_river(self, river, river_name=None):
-        """Delete a river."""
-        if not river_name:
-            river_name = river['index']['index']
-        d = self._send_request('DELETE', '/_river/{}/'.format(river_name))
-        return d
-
     def more_like_this(self, index, doc_type, id, **query_params):
         """Execute a "more like this" query against one or more fields."""
         path = make_path([index, doc_type, id, '_mlt'])
