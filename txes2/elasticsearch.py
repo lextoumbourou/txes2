@@ -126,7 +126,7 @@ class ElasticSearch(object):
     def status(self, indexes=None):
         """Retrieve the status of one or more indices."""
         indices = self._validate_indexes(indexes)
-        path = make_path([','.join(indices), '_status'])
+        path = make_path([','.join(indices), '_stats'])
         d = self._send_request('GET', path)
         return d
 
@@ -643,21 +643,6 @@ class ElasticSearch(object):
         """Execute a query against one or more indices & get the hit count."""
         indices = self._validate_indexes(indexes)
         d = self._send_query('_count', query, indices, doc_types, **params)
-        return d
-
-    def create_river(self, river, river_name=None):
-        """Create a river."""
-        if not river_name:
-            river_name = river['index']['index']
-        d = self._send_request(
-            'PUT', '/_river/{}/_meta'.format(river_name), body=river)
-        return d
-
-    def delete_river(self, river, river_name=None):
-        """Delete a river."""
-        if not river_name:
-            river_name = river['index']['index']
-        d = self._send_request('DELETE', '/_river/{}/'.format(river_name))
         return d
 
     def more_like_this(self, index, doc_type, id, **query_params):
