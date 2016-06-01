@@ -64,7 +64,7 @@ class HTTPConnectionTest(TestCase):
             ConnectionRefusedError)
 
         # Ensure we retry enough times
-        self.assertEquals(self.conn.servers.mark_dead.call_count, 3)
+        self.assertEquals(self.conn.servers.mark_dead.call_count, 4)
 
         self.conn.close()
 
