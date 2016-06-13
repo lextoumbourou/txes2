@@ -494,7 +494,7 @@ class ElasticSearch(object):
 
     def force_bulk(self):
         """Force executing of all bulk data."""
-        if not len(self.bulk_data):
+        if not self.bulk_data:
             return defer.succeed(None)
 
         data = '\n'.join(self.bulk_data)
