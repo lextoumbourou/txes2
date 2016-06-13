@@ -102,7 +102,7 @@ def raise_exceptions(status, result):
         error_message = additional_info.get('error', error_message)
         if isinstance(error_message, dict) and 'type' in error_message:
             error_message = error_message['type']
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, AttributeError):
         pass
 
     raise HTTP_EXCEPTIONS.get(

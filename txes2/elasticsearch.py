@@ -135,33 +135,10 @@ class ElasticSearch(object):
         d = self._send_request('PUT', index, settings)
         return d
 
-    def create_index_if_missing(self, index, settings=None):
-        """
-        Create an index with the optional settings dict.
-
-        Doesn't fail when index already exists.
-        """
-        def eb(failure):
-            failure.trap(exceptions.IndexAlreadyExistsException)
-            return {u'acknowledged': True, u'ok': True}
-
-        d = self.create_index(index, settings)
-        return d.addErrback(eb)
-
     def delete_index(self, index):
         """Deletes an index."""
         d = self._send_request('DELETE', index)
         return d
-
-    def delete_index_if_exists(self, index):
-        """Deletes an index if it exists."""
-        def eb(failure):
-            failure.trap(exceptions.IndexMissingException,
-                         exceptions.NotFoundException)
-            return {u'acknowledged': True, u'ok': True}
-
-        d = self.delete_index(index)
-        return d.addErrback(eb)
 
     def get_indices(self, include_aliases=False):
         """

@@ -4,8 +4,7 @@ from twisted.trial.unittest import TestCase
 
 from txes2.exceptions import (
     raise_exceptions, NotFoundException,
-    ElasticSearchException, IndexAlreadyExistsException,
-    AlreadyExistsException)
+    ElasticSearchException, RequestException)
 
 
 class ExceptionsTest(TestCase):
@@ -28,18 +27,23 @@ class ExceptionsTest(TestCase):
 
     def test_handles_exception_script_correctly(self):
         result = {
-            'error': 'IndexAlreadyExistsException[[test_index] already exists]'
+            'error': {
+                'root_cause': [{
+                    'type': 'index_already_exists_exception',
+                    'reason': 'already exists',
+                    'index': 'my_index'
+                }],
+                'type': 'index_already_exists_exception',
+                'reason': 'already exists',
+                'index': 'my_index'
+            },
+            'status': 400
         }
 
         self.assertRaises(
-            IndexAlreadyExistsException, raise_exceptions, 400, result)
-
-    def test_handle_exception_patterns_trailing(self):
-        result = {'error': 'UnexpectedException[something] Already exists'}
-        self.assertRaises(
-            AlreadyExistsException, raise_exceptions, 400, result)
+            RequestException, raise_exceptions, 400, result)
 
     def test_handle_fall_through_case(self):
         result = {'error': 'Not what I expect at all!'}
         self.assertRaises(
-            ElasticSearchException, raise_exceptions, 400, result)
+            ElasticSearchException, raise_exceptions, 412, result)

@@ -5,12 +5,11 @@ import os
 from mock import Mock
 
 from twisted.trial.unittest import TestCase
-from twisted.internet.defer import inlineCallbacks, succeed, fail
+from twisted.internet.defer import inlineCallbacks, succeed
 
 from txes2.elasticsearch import ElasticSearch
 from txes2.exceptions import ElasticSearchException, NotFoundException
-from txes2.exceptions import IndexAlreadyExistsException
-from txes2.exceptions import IndexMissingException, InvalidQuery
+from txes2.exceptions import InvalidQuery
 
 from . import settings
 
@@ -130,43 +129,11 @@ class ElasticSearchTest(TestCase):
         self.assertTrue(isinstance(result['count'], int))
 
     @inlineCallbacks
-    def test_create_and_delete_river(self):
-        self._mock = {'_type': 'twitter', 'created': True}
-
-        river_data = {
-            'type': 'twitter',
-            'twitter': {'user': 'blah'},
-            'index': {
-                'index': 'twitter',
-            }
-        }
-
-        result = yield self.es.create_river(river_data)
-        self.assertTrue(result['_type'] == 'twitter')
-
-        self._mock = {'acknowledged': True}
-
-        result = yield self.es.delete_river(river_data)
-        self.assertTrue(result['acknowledged'])
-
-    @inlineCallbacks
     def test_create_index(self):
         self._mock = {'acknowledged': True}
 
         index_name = uuid.uuid4()
         result = yield self.es.create_index(index_name)
-        self.assertTrue(result['acknowledged'])
-
-    @inlineCallbacks
-    def test_create_index_if_missing(self):
-        def side_effect(*args, **kwargs):
-            return fail(IndexAlreadyExistsException('Some error'))
-
-        if use_mock():
-            self.es.create_index = Mock()
-            self.es.create_index.side_effect = side_effect
-
-        result = yield self.es.create_index_if_missing(settings.INDEX)
         self.assertTrue(result['acknowledged'])
 
     @inlineCallbacks
@@ -218,18 +185,6 @@ class ElasticSearchTest(TestCase):
         self._mock = {'acknowledged': True}
 
         result = yield self.es.delete_index(settings.INDEX)
-        self.assertTrue(result['acknowledged'])
-
-    @inlineCallbacks
-    def test_delete_index_if_exists(self):
-        def side_effect(*args, **kwargs):
-            return fail(IndexMissingException('Some error'))
-
-        if use_mock():
-            self.es.delete_index = Mock()
-            self.es.delete_index.side_effect = side_effect
-
-        result = yield self.es.delete_index_if_exists(settings.INDEX)
         self.assertTrue(result['acknowledged'])
 
     @inlineCallbacks
