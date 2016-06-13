@@ -98,7 +98,7 @@ def raise_exceptions(status, result):
     additional_info = None
 
     try:
-        additional_info = result['error']
+        additional_info = result
         error_message = additional_info.get('error', error_message)
         if isinstance(error_message, dict) and 'type' in error_message:
             error_message = error_message['type']

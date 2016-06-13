@@ -44,6 +44,6 @@ class ExceptionsTest(TestCase):
             RequestException, raise_exceptions, 400, result)
 
     def test_handle_fall_through_case(self):
-        result = {'error': 'Not what I expect at all!'}
+        result = {'error': 'No what I expect'}
         self.assertRaises(
             ElasticSearchException, raise_exceptions, 412, result)
