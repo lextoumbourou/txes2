@@ -482,6 +482,8 @@ class ElasticSearch(object):
                 cmd[optype]['_version'] = version
             if id:
                 cmd[optype]['_id'] = id
+            if 'routing' in query_params:
+                cmd[optype]['_routing'] = query_params['routing']
             data = '\n'.join([anyjson.serialize(cmd),
                               anyjson.serialize(doc)])
             data += '\n'
