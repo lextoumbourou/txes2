@@ -1,6 +1,8 @@
 
 import anyjson
+import time
 from twisted.internet import defer, reactor
+from twisted.internet.task import LoopingCall
 
 from . import connection, exceptions
 
@@ -12,14 +14,17 @@ class ElasticSearch(object):
     """A PyES-like ElasticSearch client."""
 
     def __init__(self, servers='127.0.0.1:9200', timeout=30, bulk_size=400,
-                 discover=True, retry_time=10, discovery_interval=300,
-                 default_indexes=None, autorefresh=False, *args, **kwargs):
+                 bulk_wait_max=None, discover=True, retry_time=10,
+                 discovery_interval=300, default_indexes=None,
+                 autorefresh=False, *args, **kwargs):
         """
         :param servers: either a single ES server URL or list of servers.
                         If you don't provide a scheme (eg `https://`) then the
                         request will use HTTP by default.
         :param int timeout: connection timeout in seconds.
         :param int bulk_size: how much bulk data to accumulate before indexing
+                              (when indexing in bulk).
+        :param int bulk_wait_max: how much seconds to wait before indexing
                               (when indexing in bulk).
         :param int retry_time: frequency in seconds for retrying broken ES
                                nodes.
@@ -50,18 +55,23 @@ class ElasticSearch(object):
         self.default_indexes = default_indexes
         self.timeout = timeout
         self.bulk_size = bulk_size
+        self.bulk_wait_max = bulk_wait_max
         self.discovery_interval = discovery_interval
         self.autorefresh = autorefresh
         self.refreshed = True
 
         self.info = {}
         self.bulk_data = []
+        self.last_bulk_flush = time.time()
 
         self.connection = connection.connect(
             servers=servers, timeout=timeout, retry_time=retry_time,
             *args, **kwargs)
         if discover:
             self._perform_discovery()
+        if bulk_wait_max:
+            l = LoopingCall(self.flush_bulk,bulk_wait=True)
+            l.start(bulk_wait_max)
 
     def _perform_discovery(self):
         def cb(data):
@@ -466,7 +476,8 @@ class ElasticSearch(object):
 
     def index(
         self, doc, index, doc_type, id=None, parent=None,
-        force_insert=None, bulk=False, version=None, **query_params
+        force_insert=None, bulk=False, bulk_wait=False, version=None,
+        **query_params
     ):
         """Index a dict into an index."""
         self.refreshed = False
@@ -485,8 +496,13 @@ class ElasticSearch(object):
             data = '\n'.join([anyjson.serialize(cmd),
                               anyjson.serialize(doc)])
             data += '\n'
-            self.bulk_data.append(data)
-            return self.flush_bulk()
+            d = defer.Deferred()
+            self.bulk_data.append([d,data])
+            if bulk_wait:
+                self.flush_bulk(bulk_wait=bulk_wait)
+                return d
+            else:
+                return self.flush_bulk()
 
         if force_insert:
             query_params['op_type'] = 'create'
@@ -508,31 +524,52 @@ class ElasticSearch(object):
             params=query_params)
         return d
 
-    def flush_bulk(self, forced=False):
+    def flush_bulk(self, forced=False, bulk_wait=False):
         """Wait to process all pending operations."""
-        if not forced and len(self.bulk_data) < self.bulk_size:
+        if not forced and len(self.bulk_data) < self.bulk_size and not bulk_wait:
             return defer.succeed(None)
 
-        return self.force_bulk()
+        if bulk_wait:
+            if time.time()-self.last_bulk_flush >= self.bulk_wait_max:
+                return self.force_bulk()
+        else:
+            return self.force_bulk()
+
+    def _bulk_callback(self, result, deferreds):
+        for i in xrange(len(deferreds)):
+            deferreds[i].callback(result['items'][i])
+
+    def _bulk_errback(self, f, deferreds):
+        for i in xrange(len(deferreds)):
+            deferreds[i].errback(f)
 
     def force_bulk(self):
         """Force executing of all bulk data."""
         if not len(self.bulk_data):
             return defer.succeed(None)
-
-        data = '\n'.join(self.bulk_data)
+        # the last line must end with \n otherwise it is left out, so append it
+        data = '\n'.join(zip(*self.bulk_data)[1])+'\n'
         d = self._send_request('POST', '/_bulk', body=data)
+        d.addCallback(self._bulk_callback,zip(*self.bulk_data)[0])
+        d.addErrback(self._bulk_errback,zip(*self.bulk_data)[0])
         self.bulk_data = []
+        self.last_bulk_flush = time.time()
         return d
 
-    def delete(self, index, doc_type, id, bulk=False, **query_params):
+    def delete(self, index, doc_type, id, bulk=False, bulk_wait=False,
+               **query_params):
         """Delete a document based on its id."""
         if bulk:
             cmd = {'delete': {'_index': index,
                               '_type': doc_type,
                               '_id': id}}
-            self.bulk_data.append(anyjson.serialize(cmd))
-            return self.flush_bulk()
+            d = defer.Deferred()
+            self.bulk_data.append([d,anyjson.serialize(cmd)])
+            if bulk_wait:
+                self.flush_bulk(bulk_wait=bulk_wait)
+                return d
+            else:
+                return self.flush_bulk()
 
         path = make_path([index, doc_type, id])
         d = self._send_request('DELETE', path, params=query_params)
