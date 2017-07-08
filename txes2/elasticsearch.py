@@ -166,7 +166,7 @@ class ElasticSearch(object):
 
             for index in sorted(indices_metadata.keys()):
                 info = indices_status[index]
-                num_docs = info['docs'].get('num_docs') or 0
+                num_docs = info['total']['docs']['count']
                 result[index] = {'num_docs': num_docs}
 
                 if not include_aliases:
@@ -512,12 +512,6 @@ class ElasticSearch(object):
             return self.flush_bulk()
 
         path = make_path([index, doc_type, id])
-        d = self._send_request('DELETE', path, params=query_params)
-        return d
-
-    def delete_mapping(self, index, doc_type, **query_params):
-        """Delete a document type from a specific index."""
-        path = make_path([index, doc_type])
         d = self._send_request('DELETE', path, params=query_params)
         return d
 

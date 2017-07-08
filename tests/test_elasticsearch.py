@@ -8,7 +8,7 @@ from twisted.trial.unittest import TestCase
 from twisted.internet.defer import inlineCallbacks, succeed
 
 from txes2.elasticsearch import ElasticSearch
-from txes2.exceptions import ElasticSearchException, NotFoundException
+from txes2.exceptions import ElasticSearchException
 from txes2.exceptions import InvalidQuery
 
 from . import settings
@@ -49,14 +49,16 @@ class ElasticSearchTest(TestCase):
 
     @inlineCallbacks
     def test_analyze(self):
-        self._mock = {'tokens': [
-            {'end_offset': 6, 'token': u'text'},
-            {'end_offset': 15, 'token': 'hello'},
-            {'end_offset': 21, 'token': 'world'}]}
+        self._mock = {
+            u'tokens': [{
+                u'end_offset': 5, u'token': u'hello', u'type': u'<ALPHANUM>',
+                u'start_offset': 0, u'position': 0}, {
+                u'end_offset': 11, u'token': u'world', u'type': u'<ALPHANUM>',
+                u'start_offset': 6, u'position': 1}]}
 
         result = yield self.es.analyze('Hello world', settings.INDEX)
         self.assertTrue('tokens' in result)
-        self.assertTrue(len(result['tokens']) == 3)
+        self.assertTrue(len(result['tokens']) == 2)
 
     def test_can_handle_basestring_input(self):
         tmp_es = ElasticSearch(
@@ -154,22 +156,6 @@ class ElasticSearchTest(TestCase):
         self.assertTrue(result['acknowledged'])
 
     @inlineCallbacks
-    def test_delete_mapping(self):
-        self._mock = {'acknowledged': True}
-
-        yield self.es.index(
-            doc_type=settings.DOC_TYPE, index=settings.INDEX, id=1,
-            doc={'name': 'Hello breh'})
-        # Fixes the race condition that occurs when trying to
-        # delete doc that doesn't exist yet.
-        yield self.es.refresh(settings.INDEX)
-
-        result = yield self.es.delete_mapping(
-            settings.INDEX, settings.DOC_TYPE)
-
-        self.assertTrue(result['acknowledged'])
-
-    @inlineCallbacks
     def test_flush(self):
         self._mock = {'_shards': {'successful': 72, 'failed': 0, 'total': 72}}
 
@@ -209,8 +195,7 @@ class ElasticSearchTest(TestCase):
 
             self.es.status = Mock()
             self.es.status.side_effect = lambda: succeed({
-                'indices': {settings.INDEX: {
-                    'docs': {'num_docs': 2}}}
+                'indices': {settings.INDEX: {'total': {'docs': {'count': 2}}}}
             })
 
         yield self.es.add_alias('test_alias', settings.INDEX)
@@ -390,12 +375,15 @@ class ElasticSearchTest(TestCase):
         query = {'query': {'term': {'name': 'blah'}}}
         scroller = yield self.es.scan(query, settings.INDEX, settings.DOC_TYPE)
 
-        self.assertTrue(scroller.scroll_id == '1234')
+        self.assertTrue(scroller.scroll_id)
+
+        if not use_mock():
+            return
 
         self._mock = {'hits': {'hits': [{'result': 1}]}, '_scroll_id': '2345'}
         yield scroller.next_page()
 
-        self.assertTrue(scroller.scroll_id == '2345')
+        self.assertTrue(scroller.scroll_id)
         self.assertEquals(scroller.results, self._mock)
 
         self._mock = {'hits': {'hits': []}, '_scroll_id': '2345'}

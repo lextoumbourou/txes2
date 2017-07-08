@@ -9,8 +9,8 @@ $script = <<SCRIPT
        unzip $ROOT_PATH/elasticsearch-$ES_VERSION.zip
    fi
 
-   $ROOT_PATH/elasticsearch-$ES_VERSION/bin/elasticsearch -d --cluster.name=test --transport.tcp.port=9300 --http.port=9200 --network.bind_host=0.0.0.0 --script.inline=true
-   $ROOT_PATH/elasticsearch-$ES_VERSION/bin/elasticsearch -d --cluster.name=test --transport.tcp.port=9301 --http.port=9201 --network.bind_host=0.0.0.0 --script.inline=true
+   $ROOT_PATH/elasticsearch-$ES_VERSION/bin/elasticsearch -d --cluster.name=test --transport.tcp.port=9300 --http.port=9200 --network.bind_host=0.0.0.0 --script.inline=true --discovery.zen.ping.unicast.hosts="localhost:9300,localhost:9301"
+   $ROOT_PATH/elasticsearch-$ES_VERSION/bin/elasticsearch -d --cluster.name=test --transport.tcp.port=9301 --http.port=9201 --network.bind_host=0.0.0.0 --script.inline=true --discovery.zen.ping.unicast.hosts="localhost:9300,localhost:9301"
 SCRIPT
 
 
