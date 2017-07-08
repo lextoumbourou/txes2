@@ -515,20 +515,6 @@ class ElasticSearch(object):
         d = self._send_request('DELETE', path, params=query_params)
         return d
 
-    def delete_by_query(self, indexes, doc_types, query, **query_params):
-        """Delete documents from one or more indexes/types from query."""
-        indices = self._validate_indexes(indexes)
-        if not doc_types:
-            doc_types = []
-        elif isinstance(doc_types, basestring):
-            doc_types = [doc_types]
-
-        path = make_path(
-            [','.join(indices), ','.join(doc_types), '_query'])
-        body = {'query': query}
-        d = self._send_request('DELETE', path, body, params=query_params)
-        return d
-
     def delete_mapping(self, index, doc_type, **query_params):
         """Delete a document type from a specific index."""
         path = make_path([index, doc_type])
