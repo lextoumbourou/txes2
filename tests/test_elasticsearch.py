@@ -316,23 +316,6 @@ class ElasticSearchTest(TestCase):
         self.assertTrue('docs' in result)
 
     @inlineCallbacks
-    def test_more_like_this(self):
-        self._mock = {'hits': {}}
-        yield self.es.index(
-            {'name': 'Blah'}, id=1,
-            doc_type=settings.DOC_TYPE, index=settings.INDEX,
-            refresh=True)
-        yield self.es.index(
-            {'name': 'Blah'}, id=2,
-            doc_type=settings.DOC_TYPE, index=settings.INDEX,
-            refresh=True)
-
-        result = yield self.es.more_like_this(
-            settings.INDEX, settings.DOC_TYPE, id=1, fields=['name'])
-
-        self.assertTrue('hits' in result)
-
-    @inlineCallbacks
     def test_optimize(self):
         self._mock = {'_shards': {'successful': 10, 'failed': 0, 'total': 10}}
 

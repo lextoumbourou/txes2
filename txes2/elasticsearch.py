@@ -609,12 +609,6 @@ class ElasticSearch(object):
         d = self._send_query('_count', query, indices, doc_types, **params)
         return d
 
-    def more_like_this(self, index, doc_type, id, **query_params):
-        """Execute a "more like this" query against one or more fields."""
-        path = make_path([index, doc_type, id, '_mlt'])
-        d = self._send_request('GET', path, body={}, params=query_params)
-        return d
-
     def update_settings(self, index, settings):
         """Update settings of an index."""
         path = make_path([index, '_settings'])
