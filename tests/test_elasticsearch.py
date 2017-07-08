@@ -469,6 +469,6 @@ class ElasticSearchTest(TestCase):
     def test_update_settings(self):
         self._mock = {'acknowledged': True}
 
-        data = {'index': {'refresh_interval': 10}}
+        data = {'index': {'refresh_interval': '10s'}}
         result = yield self.es.update_settings(settings.INDEX, data)
         self.assertTrue(result['acknowledged'])
