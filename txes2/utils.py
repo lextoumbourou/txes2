@@ -35,16 +35,12 @@ class Scroller(object):
         return d
 
     def _set_results(self, results):
-        if not len(results['hits']['hits']):
+        if not results['hits']['hits']:
             self.results = None
         else:
             self.results = results
 
         return self.results
-
-    def next(self):
-        """Deprecated. Use next_page."""
-        return self.next_page()
 
 
 class ServerList(list):

@@ -5,12 +5,11 @@ import os
 from mock import Mock
 
 from twisted.trial.unittest import TestCase
-from twisted.internet.defer import inlineCallbacks, succeed, fail
+from twisted.internet.defer import inlineCallbacks, succeed
 
 from txes2.elasticsearch import ElasticSearch
-from txes2.exceptions import ElasticSearchException, NotFoundException
-from txes2.exceptions import IndexAlreadyExistsException
-from txes2.exceptions import IndexMissingException, InvalidQuery
+from txes2.exceptions import ElasticSearchException
+from txes2.exceptions import InvalidQuery
 
 from . import settings
 
@@ -50,14 +49,16 @@ class ElasticSearchTest(TestCase):
 
     @inlineCallbacks
     def test_analyze(self):
-        self._mock = {'tokens': [
-            {'end_offset': 6, 'token': u'text'},
-            {'end_offset': 15, 'token': 'hello'},
-            {'end_offset': 21, 'token': 'world'}]}
+        self._mock = {
+            u'tokens': [{
+                u'end_offset': 5, u'token': u'hello', u'type': u'<ALPHANUM>',
+                u'start_offset': 0, u'position': 0}, {
+                u'end_offset': 11, u'token': u'world', u'type': u'<ALPHANUM>',
+                u'start_offset': 6, u'position': 1}]}
 
         result = yield self.es.analyze('Hello world', settings.INDEX)
         self.assertTrue('tokens' in result)
-        self.assertTrue(len(result['tokens']) == 3)
+        self.assertTrue(len(result['tokens']) == 2)
 
     def test_can_handle_basestring_input(self):
         tmp_es = ElasticSearch(
@@ -130,43 +131,11 @@ class ElasticSearchTest(TestCase):
         self.assertTrue(isinstance(result['count'], int))
 
     @inlineCallbacks
-    def test_create_and_delete_river(self):
-        self._mock = {'_type': 'twitter', 'created': True}
-
-        river_data = {
-            'type': 'twitter',
-            'twitter': {'user': 'blah'},
-            'index': {
-                'index': 'twitter',
-            }
-        }
-
-        result = yield self.es.create_river(river_data)
-        self.assertTrue(result['_type'] == 'twitter')
-
-        self._mock = {'acknowledged': True}
-
-        result = yield self.es.delete_river(river_data)
-        self.assertTrue(result['acknowledged'])
-
-    @inlineCallbacks
     def test_create_index(self):
         self._mock = {'acknowledged': True}
 
         index_name = uuid.uuid4()
         result = yield self.es.create_index(index_name)
-        self.assertTrue(result['acknowledged'])
-
-    @inlineCallbacks
-    def test_create_index_if_missing(self):
-        def side_effect(*args, **kwargs):
-            return fail(IndexAlreadyExistsException('Some error'))
-
-        if use_mock():
-            self.es.create_index = Mock()
-            self.es.create_index.side_effect = side_effect
-
-        result = yield self.es.create_index_if_missing(settings.INDEX)
         self.assertTrue(result['acknowledged'])
 
     @inlineCallbacks
@@ -180,72 +149,10 @@ class ElasticSearchTest(TestCase):
         self.assertTrue(result['_id'] == '2')
 
     @inlineCallbacks
-    def test_delete_by_query(self):
-        def raise_exception(*args, **kwargs):
-            raise NotFoundException('Item not found')
-
-        self._mock = {'_id': 'someid'}
-        data = {'name': 'blah'}
-        result = yield self.es.index(data, settings.INDEX, settings.DOC_TYPE)
-        doc_id = result['_id']
-
-        self._mock = {'_id': 'someid', 'found': True}
-        result = yield self.es.get(
-            settings.INDEX, settings.DOC_TYPE, id=doc_id)
-        self.assertTrue(result['found'])
-
-        self._mock = {}
-        query = {'term': {'name': 'blah'}}
-        result = yield self.es.delete_by_query(
-            settings.INDEX, settings.DOC_TYPE, query)
-
-        if use_mock():
-            # Reset mock
-            self.es.connection.execute = Mock()
-            self.es.connection.execute.side_effect = raise_exception
-
-        has_failed = False
-        try:
-            yield self.es.get(
-                settings.INDEX, settings.DOC_TYPE, id=doc_id)
-        except NotFoundException:
-            has_failed = True
-
-        self.assertTrue(has_failed)
-
-    @inlineCallbacks
     def test_delete_index(self):
         self._mock = {'acknowledged': True}
 
         result = yield self.es.delete_index(settings.INDEX)
-        self.assertTrue(result['acknowledged'])
-
-    @inlineCallbacks
-    def test_delete_index_if_exists(self):
-        def side_effect(*args, **kwargs):
-            return fail(IndexMissingException('Some error'))
-
-        if use_mock():
-            self.es.delete_index = Mock()
-            self.es.delete_index.side_effect = side_effect
-
-        result = yield self.es.delete_index_if_exists(settings.INDEX)
-        self.assertTrue(result['acknowledged'])
-
-    @inlineCallbacks
-    def test_delete_mapping(self):
-        self._mock = {'acknowledged': True}
-
-        yield self.es.index(
-            doc_type=settings.DOC_TYPE, index=settings.INDEX, id=1,
-            doc={'name': 'Hello breh'})
-        # Fixes the race condition that occurs when trying to
-        # delete doc that doesn't exist yet.
-        yield self.es.refresh(settings.INDEX)
-
-        result = yield self.es.delete_mapping(
-            settings.INDEX, settings.DOC_TYPE)
-
         self.assertTrue(result['acknowledged'])
 
     @inlineCallbacks
@@ -288,8 +195,7 @@ class ElasticSearchTest(TestCase):
 
             self.es.status = Mock()
             self.es.status.side_effect = lambda: succeed({
-                'indices': {settings.INDEX: {
-                    'docs': {'num_docs': 2}}}
+                'indices': {settings.INDEX: {'total': {'docs': {'count': 2}}}}
             })
 
         yield self.es.add_alias('test_alias', settings.INDEX)
@@ -361,23 +267,6 @@ class ElasticSearchTest(TestCase):
         self.assertTrue('docs' in result)
 
     @inlineCallbacks
-    def test_more_like_this(self):
-        self._mock = {'hits': {}}
-        yield self.es.index(
-            {'name': 'Blah'}, id=1,
-            doc_type=settings.DOC_TYPE, index=settings.INDEX,
-            refresh=True)
-        yield self.es.index(
-            {'name': 'Blah'}, id=2,
-            doc_type=settings.DOC_TYPE, index=settings.INDEX,
-            refresh=True)
-
-        result = yield self.es.more_like_this(
-            settings.INDEX, settings.DOC_TYPE, id=1, fields=['name'])
-
-        self.assertTrue('hits' in result)
-
-    @inlineCallbacks
     def test_optimize(self):
         self._mock = {'_shards': {'successful': 10, 'failed': 0, 'total': 10}}
 
@@ -400,15 +289,11 @@ class ElasticSearchTest(TestCase):
         result = yield self.es.get(
             index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1)
 
-        yield self.es.partial_update(
-            index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1,
-            script_file='new-tag', params={'new_tag': 'tag3'})
-
-        self._mock = {'_source': {'tags': ['tag1', 'tag2', 'tag3']}}
+        self._mock = {'_source': {'tags': ['tag1', 'tag2']}}
         result = yield self.es.get(
             index=settings.INDEX, doc_type=settings.DOC_TYPE, id=1)
 
-        self.assertTrue(result['_source']['tags'] == ['tag1', 'tag2', 'tag3'])
+        self.assertTrue(result['_source']['tags'] == ['tag1', 'tag2'])
 
     @inlineCallbacks
     def test_partial_update_failure_cases(self):
@@ -490,12 +375,15 @@ class ElasticSearchTest(TestCase):
         query = {'query': {'term': {'name': 'blah'}}}
         scroller = yield self.es.scan(query, settings.INDEX, settings.DOC_TYPE)
 
-        self.assertTrue(scroller.scroll_id == '1234')
+        self.assertTrue(scroller.scroll_id)
+
+        if not use_mock():
+            return
 
         self._mock = {'hits': {'hits': [{'result': 1}]}, '_scroll_id': '2345'}
         yield scroller.next_page()
 
-        self.assertTrue(scroller.scroll_id == '2345')
+        self.assertTrue(scroller.scroll_id)
         self.assertEquals(scroller.results, self._mock)
 
         self._mock = {'hits': {'hits': []}, '_scroll_id': '2345'}
@@ -531,6 +419,6 @@ class ElasticSearchTest(TestCase):
     def test_update_settings(self):
         self._mock = {'acknowledged': True}
 
-        data = {'index': {'refresh_interval': 10}}
+        data = {'index': {'refresh_interval': '10s'}}
         result = yield self.es.update_settings(settings.INDEX, data)
         self.assertTrue(result['acknowledged'])

@@ -33,18 +33,10 @@ class ElasticSearchException(Exception):
     An exception of this class will be raised if no more specific subclass
     is appropriate.
     """
-    def __init__(self, error, status=None, result=None):
+    def __init__(self, error, status=None, additional_info=None):
         super(ElasticSearchException, self).__init__(error)
         self.status = status
-        self.result = result
-
-
-class ElasticSearchIllegalArgumentException(ElasticSearchException):
-    pass
-
-
-class IndexMissingException(ElasticSearchException):
-    pass
+        self.additional_info = additional_info
 
 
 class NotFoundException(ElasticSearchException):
@@ -55,29 +47,35 @@ class AlreadyExistsException(ElasticSearchException):
     pass
 
 
-class IndexAlreadyExistsException(AlreadyExistsException):
+class RequestException(ElasticSearchException):
     pass
 
 
-class SearchPhaseExecutionException(ElasticSearchException):
+class ConflictException(ElasticSearchException):
     pass
 
 
-class ReplicationShardOperationFailedException(ElasticSearchException):
+class AuthenticationException(ElasticSearchException):
     pass
 
 
-class ClusterBlockException(ElasticSearchException):
-    pass
-
-
-class MapperParsingException(ElasticSearchException):
+class AuthorizationException(ElasticSearchException):
     pass
 
 
 exception_patterns_trailing = {
     '] missing': NotFoundException,
     '] Already exists': AlreadyExistsException,
+}
+
+
+# generic mappings from status_code to python exceptions
+HTTP_EXCEPTIONS = {
+    400: RequestException,
+    401: AuthenticationException,
+    403: AuthorizationException,
+    404: NotFoundException,
+    409: ConflictException,
 }
 
 
@@ -96,18 +94,17 @@ def raise_exceptions(status, result):
     if not isinstance(result, dict) or "error" not in result:
         raise ElasticSearchException("Unknown exception type",
                                      status, result)
+    error_message = result
+    additional_info = None
 
-    error = result["error"]
-    bits = error.split('[', 1)
-    if len(bits) == 2:
-        exc_class = globals().get(bits[0])
-        if exc_class:
-            msg = bits[1].rstrip(']')
-            raise exc_class(msg, status, result)
+    try:
+        additional_info = result
+        error_message = additional_info.get('error', error_message)
+        if isinstance(error_message, dict) and 'type' in error_message:
+            error_message = error_message['type']
+    except (ValueError, TypeError, AttributeError):
+        pass
 
-    for pattern, exc_class in exception_patterns_trailing.iteritems():
-        if not error.endswith(pattern):
-            continue
-        raise exc_class(error, status, result)
-
-    raise ElasticSearchException(error, status, result)
+    raise HTTP_EXCEPTIONS.get(
+        status, ElasticSearchException)(
+            error_message, status, additional_info)

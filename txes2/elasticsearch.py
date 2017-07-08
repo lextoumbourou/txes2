@@ -126,7 +126,7 @@ class ElasticSearch(object):
     def status(self, indexes=None):
         """Retrieve the status of one or more indices."""
         indices = self._validate_indexes(indexes)
-        path = make_path([','.join(indices), '_status'])
+        path = make_path([','.join(indices), '_stats'])
         d = self._send_request('GET', path)
         return d
 
@@ -135,33 +135,10 @@ class ElasticSearch(object):
         d = self._send_request('PUT', index, settings)
         return d
 
-    def create_index_if_missing(self, index, settings=None):
-        """
-        Create an index with the optional settings dict.
-
-        Doesn't fail when index already exists.
-        """
-        def eb(failure):
-            failure.trap(exceptions.IndexAlreadyExistsException)
-            return {u'acknowledged': True, u'ok': True}
-
-        d = self.create_index(index, settings)
-        return d.addErrback(eb)
-
     def delete_index(self, index):
         """Deletes an index."""
         d = self._send_request('DELETE', index)
         return d
-
-    def delete_index_if_exists(self, index):
-        """Deletes an index if it exists."""
-        def eb(failure):
-            failure.trap(exceptions.IndexMissingException,
-                         exceptions.NotFoundException)
-            return {u'acknowledged': True, u'ok': True}
-
-        d = self.delete_index(index)
-        return d.addErrback(eb)
 
     def get_indices(self, include_aliases=False):
         """
@@ -189,7 +166,7 @@ class ElasticSearch(object):
 
             for index in sorted(indices_metadata.keys()):
                 info = indices_status[index]
-                num_docs = info['docs'].get('num_docs') or 0
+                num_docs = info['total']['docs']['count']
                 result[index] = {'num_docs': num_docs}
 
                 if not include_aliases:
@@ -519,7 +496,7 @@ class ElasticSearch(object):
 
     def force_bulk(self):
         """Force executing of all bulk data."""
-        if not len(self.bulk_data):
+        if not self.bulk_data:
             return defer.succeed(None)
 
         data = '\n'.join(self.bulk_data)
@@ -537,26 +514,6 @@ class ElasticSearch(object):
             return self.flush_bulk()
 
         path = make_path([index, doc_type, id])
-        d = self._send_request('DELETE', path, params=query_params)
-        return d
-
-    def delete_by_query(self, indexes, doc_types, query, **query_params):
-        """Delete documents from one or more indexes/types from query."""
-        indices = self._validate_indexes(indexes)
-        if not doc_types:
-            doc_types = []
-        elif isinstance(doc_types, basestring):
-            doc_types = [doc_types]
-
-        path = make_path(
-            [','.join(indices), ','.join(doc_types), '_query'])
-        body = {'query': query}
-        d = self._send_request('DELETE', path, body, params=query_params)
-        return d
-
-    def delete_mapping(self, index, doc_type, **query_params):
-        """Delete a document type from a specific index."""
-        path = make_path([index, doc_type])
         d = self._send_request('DELETE', path, params=query_params)
         return d
 
@@ -634,27 +591,6 @@ class ElasticSearch(object):
         d = self._send_query('_count', query, indices, doc_types, **params)
         return d
 
-    def create_river(self, river, river_name=None):
-        """Create a river."""
-        if not river_name:
-            river_name = river['index']['index']
-        d = self._send_request(
-            'PUT', '/_river/{}/_meta'.format(river_name), body=river)
-        return d
-
-    def delete_river(self, river, river_name=None):
-        """Delete a river."""
-        if not river_name:
-            river_name = river['index']['index']
-        d = self._send_request('DELETE', '/_river/{}/'.format(river_name))
-        return d
-
-    def more_like_this(self, index, doc_type, id, **query_params):
-        """Execute a "more like this" query against one or more fields."""
-        path = make_path([index, doc_type, id, '_mlt'])
-        d = self._send_request('GET', path, body={}, params=query_params)
-        return d
-
     def update_settings(self, index, settings):
         """Update settings of an index."""
         path = make_path([index, '_settings'])
@@ -665,13 +601,7 @@ class ElasticSearch(object):
         self, index, doc_type, id, doc=None, script=None, script_file=None,
         params=None, upsert=None, **query_params
     ):
-        """
-        Partially update a document with a script.
-
-        If ``script`` is passed in, ``script_file`` is ignored.
-        For ``script_file`` to work, ES >= 1.4.5 is required as per:
-        https://github.com/elastic/elasticsearch/issues/10007
-        """
+        """Partially update a document with a script."""
         if doc is None and script is None and script_file is None:
             raise exceptions.InvalidQuery(
                 'script, script_file or doc cannot all be None')
