@@ -43,8 +43,9 @@ Changelog
 ^^^^^^^^^^^^^^^^^
 
 * Support for ES 2.x (tested on ES 2.4.2).
+
   * Removed `more_like_this <https://www.elastic.co/guide/en/elasticsearch/reference/2.4/search-more-like-this.html>`_ method.
-  * Removed `delete_by_query <https://www.elastic.co/guide/en/elasticsearch/reference/1.7/docs-delete-by-query.html>`_.
+  * Removed `delete_by_query <https://www.elastic.co/guide/en/elasticsearch/reference/1.7/docs-delete-by-query.html>`_ method.
   * Removed `*_river <https://www.elastic.co/blog/deprecating-rivers>`_ methods.
   * Removed ``create_index_if_missing`` method.
   * Removed ``delete_index_if_exists`` method.
