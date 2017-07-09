@@ -39,8 +39,8 @@ BSD (as per original project).
 Changelog
 ---------
 
-2.0.0 (Unrelease)
-^^^^^^^^^^^^^^^^^
+2.0.0
+^^^^^^
 
 * Support for ES 2.x (tested on ES 2.4.2).
 
