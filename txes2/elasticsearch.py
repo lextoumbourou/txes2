@@ -1,3 +1,4 @@
+"""A PyES-like Elasticsearch client for Twisted."""
 
 import anyjson
 from twisted.internet import defer, reactor
@@ -7,14 +8,15 @@ from . import connection, exceptions
 from .utils import make_path, Scroller
 
 
-class ElasticSearch(object):
-
-    """A PyES-like ElasticSearch client."""
+class Elasticsearch(object):
+    """A PyES-like Elasticsearch client for Twisted."""
 
     def __init__(self, servers='127.0.0.1:9200', timeout=30, bulk_size=400,
                  discover=True, retry_time=10, discovery_interval=300,
                  default_indexes=None, autorefresh=False, *args, **kwargs):
         """
+        Init.
+
         :param servers: either a single ES server URL or list of servers.
                         If you don't provide a scheme (eg `https://`) then the
                         request will use HTTP by default.
@@ -136,12 +138,14 @@ class ElasticSearch(object):
         return d
 
     def delete_index(self, index):
-        """Deletes an index."""
+        """Delete an index."""
         d = self._send_request('DELETE', index)
         return d
 
     def get_indices(self, include_aliases=False):
         """
+        Get indices.
+
         Retrieve a dict where each key is the index name and each value is
         another dict containing the following properties:
 
@@ -259,6 +263,7 @@ class ElasticSearch(object):
         return d
 
     def flush(self, indexes=None, wait_if_ongoing=None, full=None, force=None):
+        """Flush a set of indices."""
         def flush_it(result=None):
             indices = self._validate_indexes(indexes)
             path = make_path([','.join(indices), '_flush'])
@@ -282,6 +287,7 @@ class ElasticSearch(object):
             return flush_it()
 
     def refresh(self, indexes=None, timesleep=1):
+        """Refresh a set of indices."""
         def wait(results):
             d = self.cluster_health(wait_for_status='green')
             d.addCallback(lambda _: results)
@@ -351,7 +357,7 @@ class ElasticSearch(object):
         return d
 
     def get_mapping(self, doc_type=None, indexes=None):
-        """Get the mapping definition"""
+        """Get the mapping definition."""
         indices = self._validate_indexes(indexes)
         path_items = [','.join(indices)]
 
@@ -574,18 +580,16 @@ class ElasticSearch(object):
         d = self._send_query('_search', query, indices, doc_type, **params)
         return d
 
-    def scan(
-        self, query, indexes=None, doc_type=None,
-        scroll_timeout='10m', **params
-    ):
-        """Start a scroll with _doc order, eventually returning a Scroller."""
-        if query:
-            query['sort']=['_doc']
-        d = self.search(
-            query=query, indexes=indexes, doc_type=doc_type,
-            search_types='scroll', scroll=scroll_timeout, **params)
-        d.addCallback(lambda results: Scroller(results, scroll_timeout, self))
-        return d
+    def scan(self, query, *args, **kwargs):
+        """
+        Scan through an index.
+
+        Alias for scroll with a _doc order.
+        """
+        if query and not query.get('sort'):
+            query['sort'] = ['_doc']
+
+        return self.scroll(query, *args, **kwargs)
 
     def scroll(
         self, query, indexes=None, doc_type=None,
@@ -640,3 +644,6 @@ class ElasticSearch(object):
     def servers(self):
         """Return a list of servers available for connections."""
         return self.connection.servers
+
+
+ElasticSearch = Elasticsearch
