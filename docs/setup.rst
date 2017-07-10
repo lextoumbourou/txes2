@@ -37,7 +37,7 @@ Unit
 Integration
 ^^^^^^^^^^^
 
-1. Start Vagrant box, which runs an ElasticSearch cluster with ports ``9210`` and ``9211`` forwarded to the separate ElasticSearch instances.
+1. Start Vagrant box, which runs an Elasticsearch cluster with ports ``9210`` and ``9211`` forwarded to the separate Elasticsearch instances.
 
 ::
 

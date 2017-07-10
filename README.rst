@@ -39,6 +39,13 @@ BSD (as per original project).
 Changelog
 ---------
 
+2.0.1
+^^^^^^
+
+* Renamed ``ElasticSearch`` to ``Elasticsearch`` (old name will still be available for backwards compatilibity).
+* Add ``Elasticsearch.scroller`` method and converted ``scan`` method into a scroller with ``_doc`` ordering (thanks @bra-fsn).
+* Add ``Scroller.delete`` method for clearing scroller when finished.
+
 2.0.0
 ^^^^^^
 

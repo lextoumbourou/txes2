@@ -10,7 +10,7 @@ Usage Example
     from twisted.internet import reactor
     from twisted.internet.defer import inlineCallbacks
     
-    from txes2 import ElasticSearch
+    from txes2 import Elasticsearch
     
     
     @inlineCallbacks
@@ -21,7 +21,7 @@ Usage Example
         ########################
         # Setup connection
         ########################
-        es = ElasticSearch('127.0.0.1:9200')
+        es = Elasticsearch('127.0.0.1:9200')
     
         ########################
         # Index a document

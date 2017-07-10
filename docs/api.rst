@@ -3,6 +3,6 @@
 API
 ===
 
-.. autoclass:: txes2.ElasticSearch
+.. autoclass:: txes2.Elasticsearch
    :members:
    :inherited-members:
