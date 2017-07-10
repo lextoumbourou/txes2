@@ -20,11 +20,14 @@ class Scroller(object):
         self.results = results
         self.scroll_timeout = scroll_timeout
         self.es = es
+        self._scroll_id = None
 
     @property
     def scroll_id(self):
         if self.results:
-            return str(self.results['_scroll_id'])
+            self._scroll_id = str(self.results['_scroll_id'])
+
+        return self._scroll_id
 
     def next_page(self):
         """Fetch next page from scroll API."""
@@ -41,6 +44,18 @@ class Scroller(object):
             self.results = results
 
         return self.results
+
+    def delete(self):
+        """Clear Scroll when finished."""
+        def _clear_scroll(*args, **kwargs):
+            self._scroll_id = None
+
+        if not self.scroll_id:
+            return
+
+        return self.es._send_request(
+            'DELETE', '_search/scroll',
+            body={'scroll_id': [self.scroll_id]}).addCallback(_clear_scroll)
 
 
 class ServerList(list):
