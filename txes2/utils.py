@@ -32,8 +32,8 @@ class Scroller(object):
     def next_page(self):
         """Fetch next page from scroll API."""
         d = self.es._send_request(
-            'GET', '_search/scroll', self.scroll_id,
-            params={'scroll': self.scroll_timeout})
+            'POST', '_search/scroll',
+            {'scroll': self.scroll_timeout, 'scroll_id': self.scroll_id})
         d.addCallback(self._set_results)
         return d
 

@@ -52,6 +52,7 @@ class HTTPConnection(object):
     @defer.inlineCallbacks
     def execute(self, method, path, body=None, params=None):
         """Execute a query against a server."""
+        headers = {b'Content-Type': [b'application/json']}
         if not isinstance(body, basestring):
             body = anyjson.serialize(body)
 
@@ -65,7 +66,7 @@ class HTTPConnection(object):
                 response = yield treq.request(
                     method, url, data=body, pool=self.pool,
                     auth=self.http_auth, persistent=self.persistent,
-                    timeout=timeout)
+                    timeout=timeout, headers=headers)
                 json_data = yield response.json()
                 exceptions.raise_exceptions(response.code, json_data)
             except Exception as e:
