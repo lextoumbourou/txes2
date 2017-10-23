@@ -598,7 +598,7 @@ class Elasticsearch(object):
         """Start a scroll eventually returning a Scroller."""
         d = self.search(
             query=query, indexes=indexes, doc_type=doc_type,
-            search_types='scroll', scroll=scroll_timeout, **params)
+            scroll=scroll_timeout, **params)
         d.addCallback(lambda results: Scroller(results, scroll_timeout, self))
         return d
 
