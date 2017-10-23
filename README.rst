@@ -163,3 +163,4 @@ If you contribute to this project, feel free to add your name and/or Github user
 * `Jason Kölker (@jkoelker) <https://github.com/jkoelker>`_ - original author
 * `Zuhaib Siddique (@zsiddique) <https://github.com/zsiddique>`_
 * `Lex Toumbourou (@lextoumbourou) <https://github.com/lextoumbourou>`_ - current maintainer
+* `Jon Waterhouse (@jwaterhouse) <https://github.com/jwaterhouse>`_ - ES 5 compatibility
