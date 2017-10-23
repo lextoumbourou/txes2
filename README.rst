@@ -39,6 +39,11 @@ BSD (as per original project).
 Changelog
 ---------
 
+2.1.0
+^^^^^^
+
+* ES 5 compatibility thanks to @jwaterhouse.
+
 2.0.1
 ^^^^^^
 
